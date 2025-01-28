@@ -1,0 +1,25 @@
+﻿  main.cpp
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(52,27): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(52,49): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,52): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,52): warning C4244:         with
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,52): warning C4244:         [
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,52): warning C4244:             T=float
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,52): warning C4244:         ]
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,49): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,49): warning C4244:         with
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,49): warning C4244:         [
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,49): warning C4244:             T=float
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(446,49): warning C4244:         ]
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,90): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,90): warning C4244:         with
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,90): warning C4244:         [
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,90): warning C4244:             T=float
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,90): warning C4244:         ]
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,88): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,88): warning C4244:         with
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,88): warning C4244:         [
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,88): warning C4244:             T=float
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(500,88): warning C4244:         ]
+C:\Users\mazde\Desktop\code\chess_new\main.cpp(463,1): warning C4715: 'convertTurnToColor': not all control paths return a value
+  chess_new.vcxproj -> C:\Users\mazde\Desktop\code\chess_new\x64\Debug\chess_new.exe
