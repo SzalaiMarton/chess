@@ -1,3 +1,6 @@
+#ifndef ASSETS_H
+#define ASSETS_H
+
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -27,3 +30,5 @@ public:
 
     static std::vector<ObjectTexture> textureVector;
 };
+
+#endif // ASSETS_H

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "assets.h"
 #include "SFML/Graphics.hpp"
 
 class Objects
