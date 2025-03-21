@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run SFML App",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/app.exe",
+            "cwd": "${workspaceFolder}",
+            "externalConsole": true,
+            "MIMode": "gdb"
+        }
+    ]
+}
+    
