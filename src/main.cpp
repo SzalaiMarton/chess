@@ -4,10 +4,10 @@
 #include "functions.h"
 
 sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Game");
-Assets assets;
 
 int main()
 {
+    Assets assets;
     Assets::loadDirectoryElements(assets.pathToOtherTextures);
     Assets::loadDirectoryElements(assets.pathToPieceTextures);
 

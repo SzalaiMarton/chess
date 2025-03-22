@@ -1,6 +1,6 @@
 #include "assets.h"
 
-Assets assets;
+std::vector<Assets::ObjectTexture> Assets::textureVector;
 
 Assets::ObjectTexture Assets::getObjectTexture(std::string name)
 {
@@ -17,6 +17,7 @@ Assets::ObjectTexture Assets::getObjectTexture(std::string name)
 
 bool Assets::loadImage(std::string path, std::string name, sf::Texture& texture)
 {
+    Assets assets;
     return texture.loadFromFile(path + name + assets.fileType);
 }
 

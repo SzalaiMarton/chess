@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OBJECTS_H
+#define OBJECTS_H
 
 #include <string>
 #include <vector>
@@ -66,3 +67,5 @@ public:
     static std::vector<Piece> allPieces;
     static std::vector<Indicator> allIndicators;
 };
+
+#endif

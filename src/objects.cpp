@@ -1,6 +1,9 @@
 #include "objects.h"
 #include "assets.h"
 
+std::vector<Objects::Piece> Objects::allPieces;
+std::vector<Objects::Indicator> Objects::allIndicators;
+
 void Objects::Piece::deletePiece()
 {
     Assets::ObjectTexture temp = Assets::getObjectTexture("cell");
@@ -12,7 +15,7 @@ void Objects::Piece::deletePiece()
     this->color = PieceColor::NONE;
     this->isPinned = false;
     this->pinnedByIndex = nullIndex;
-    this->legalMoves.empty();
+    this->legalMoves.clear();
     this->sprite.setTexture(temp.texture);
 }
 
@@ -47,11 +50,6 @@ std::string Objects::getPieceNameString(Objects::PieceName piece) {
 void Objects::Board::removePiece(Piece* piece)
 {
     piece->deletePiece();
-}
-
-Objects::Board::Board()
-{
-    return;
 }
 
 Objects::Board::Board(Assets::ObjectTexture* objTexture)
