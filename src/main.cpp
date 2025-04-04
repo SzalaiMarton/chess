@@ -2,38 +2,36 @@
 #include "SFML/Graphics.hpp"
 #include "assets.h"
 #include "functions.h"
+#include "objects.h"
+#include "settings.h"
 
-sf::RenderWindow window(sf::VideoMode(800, 800), "Chess Game");
+sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), windowTitle);
 
 int main()
 {
-    Assets assets;
-    Assets::loadDirectoryElements(assets.pathToOtherTextures);
-    Assets::loadDirectoryElements(assets.pathToPieceTextures);
+    Assets::loadDirectoryElements(pathToOtherTextures);
+    Assets::loadDirectoryElements(pathToPieceTextures);
 
     Assets::ObjectTexture boardTexture = Assets::getObjectTexture("board");
     Objects::Board chessBoard(&boardTexture);
 
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(fps);
+	Functions::initGame(chessBoard);
     while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
+
+
+
             
-            
-
-
-
-            Functions::refresFrame(window, chessBoard);
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
+            Functions::refreshFrame(window, chessBoard);
         }
-
-        window.clear();
-        window.display();
     }
     return 0;
 }

@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 #include "assets.h"
+#include "settings.h"
 #include "SFML/Graphics.hpp"
 
 class Objects
 {
 public:
-    static const int nullIndex = 100;
 
     enum PieceColor
     {
@@ -48,24 +48,25 @@ public:
         std::vector<std::vector<Indicator>> legalMoves;
 
         Piece(PieceName name, PieceColor color, int x, int y);
-        
+        Piece(PieceName name, PieceColor color, int x, int y, const sf::Texture&);
+
         void deletePiece();
-        void setTexture(sf::Texture texture);
+        void setTexture(const sf::Texture& texture);
     };
 
     class Board
     {
     public:
         sf::Sprite sprite;
-        std::vector<std::vector<Piece>> board;
+        std::vector<Piece> onBoard;
         void removePiece(Piece*);
 
         Board(Assets::ObjectTexture*);
     };
 
-    static std::string getPieceNameString(Objects::PieceName piece);
-    static std::vector<Piece> allPieces;
-    static std::vector<Indicator> allIndicators;
+    static std::string getPieceNameString(Objects::PieceName);
+    static PieceName convertStringToPieceName(std::string&);
+    static PieceColor convertCharToPieceColor(char);
 };
 
 #endif

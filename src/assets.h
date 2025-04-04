@@ -6,29 +6,31 @@
 #include <filesystem>
 #include <iostream>
 #include "SFML/Graphics.hpp"
+#include "settings.h"
+
 
 class Assets
 {
 public:
-    const std::string pathToPieceTextures = "res/texture/piece_textures";
-    const std::string pathToOtherTextures = "res/texture/other_textures";
-    const std::string fileType = "png";
-
+    
     class ObjectTexture
     {
     public:
         std::string name;
         sf::Texture texture;
 
-        ObjectTexture(std::string name, sf::Texture texture);
+        ObjectTexture();
+        ObjectTexture(const std::string& name, sf::Texture& texture);
     };
 
-    static ObjectTexture getObjectTexture(std::string);
-    static bool loadImage(std::string, std::string, sf::Texture&);
-    static void loadDirectoryElements(std::string);
+    static ObjectTexture getObjectTexture(const std::string&);
+    static bool loadImage(const std::string&, const std::string&, sf::Texture&);
+    static void loadDirectoryElements(const std::string&);
     static std::vector<std::string> getDirectoryContents(const std::string &path);
+    
 
-    static std::vector<ObjectTexture> textureVector;
+    static std::vector<ObjectTexture> pieceTextures;
+    static std::vector<ObjectTexture> otherTextures;
 };
 
-#endif // ASSETS_H
+#endif

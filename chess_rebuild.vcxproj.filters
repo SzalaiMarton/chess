@@ -9,9 +9,17 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="res">
+      <UniqueIdentifier>{b99083e4-ba36-4f5e-abf4-a2e8fd9e0552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\texture">
+      <UniqueIdentifier>{6714e624-9768-46d5-bf2d-a0c0c8b479bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\texture\piece_textures">
+      <UniqueIdentifier>{ed74a512-6a22-4dd0-b8df-c8e15e625409}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="res\texture\other_textures">
+      <UniqueIdentifier>{9cf4fec5-db14-4b90-ad3c-4ab41eeb3e4c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -38,121 +46,79 @@
     <ClInclude Include="src\objects.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\todo" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\textures\piece_textures\bbishop.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\bking.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\bknight.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\bpawn.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\bqueen.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\brook.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\cell.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\wbishop.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\wking.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\wknight.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\wpawn.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\wqueen.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\piece_textures\wrook.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\piece_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\black_win.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\board.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\board_with_numbers.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\cell_named.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\legalMoveIndicator.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\mark.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\stalemate.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
     <Image Include="res\textures\other_textures\white_win.png">
-      <Filter>Resource Files</Filter>
+      <Filter>res\texture\other_textures</Filter>
     </Image>
-    <Image Include="res\textures\big_textures\blackBishop_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\blackKing_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\blackKnight_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\blackpawn_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\blackQueen_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\blackRook_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\board_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\cell_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\legalMoveIndicator_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\mark_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\whiteBishop_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\whiteKing_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\whiteKnight_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\whitepawn_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\whiteQueen_big.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="res\textures\big_textures\whiteRook_big.png">
-      <Filter>Resource Files</Filter>
+    <Image Include="res\textures\other_textures\cell.png">
+      <Filter>res\texture\other_textures</Filter>
     </Image>
   </ItemGroup>
 </Project>
