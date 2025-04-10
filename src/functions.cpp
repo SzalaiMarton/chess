@@ -15,6 +15,7 @@ void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board)
 
 void Functions::initGame(Objects::Board& board)
 {
+	Functions::sortPieceTextures();
 	Functions::placePieces(board);
 }
 
@@ -22,82 +23,80 @@ void Functions::placePieces(Objects::Board& board)
 {
 	int cellX = 0;
 	int cellY = 0;
-	int index = 0;
-	for (int y = 0; y < 8; y++)
+	for (auto& texture : Assets::pieceTextures)
 	{
-		if (y == 3)
+		char color;
+		std::string name;
+		Functions::splitTextureName(texture->name, color, name);
+		Objects::Piece newPiece(Objects::convertStringToPieceName(name), Objects::convertCharToPieceColor(color), texture->texture);
+		newPiece.sprite.setPosition(cellX*cellWidth, cellY*cellHeight);
+		newPiece.sprite.setScale(pieceScale, pieceScale);
+		if (name == "pawn")
 		{
-			Functions::fillBlankWithCells(32, 0, y, board);
-			y = 6;
+			for (int i = 0; i < 8; i++)
+			{
+				newPiece.sprite.setPosition(i * cellWidth, cellY * cellHeight);
+				board.onBoard.emplace_back(newPiece);
+				cellX = 7;
+			}
 		}
-		for (int x = 0; x < 8; x++)
+		else
 		{
-			std::string name = "asd";
-			char color = 'w';
-			std::cout << Assets::pieceTextures[index]->name;
-			Functions::splitTextureName(Assets::pieceTextures[index]->name, color, name);
-			Assets::ObjectTexture* tempTexture = Assets::getObjectTexture(name);
-			Objects::Piece newPiece(Objects::convertStringToPieceName(name), Objects::convertCharToPieceColor(color), x, y, tempTexture->texture);
 			board.onBoard.emplace_back(newPiece);
-			index++;
-			cellX += cellWidth;
 		}
-		cellY += cellHeight;
-		cellX = 0;
+		cellX++;
+		if (cellX >= 8)
+		{
+			cellX = 0;
+			cellY++;
+		}
+		if (cellY == 2)
+		{
+			Functions::fillBlankWithCells(32, cellX, cellY, board);
+		}
 	}
 }
 
-void Functions::fillBlankWithCells(int amount, int x, int y, Objects::Board& board)
+void Functions::fillBlankWithCells(int amount, int& cellX, int& cellY, Objects::Board& board)
 {
-	int cellX = cellWidth * x;
-	int cellY = cellHeight * y;
-	for (int index = 0; index < amount; index++)
+	for (int i = 0; i < amount; i++)
 	{
-		Assets::ObjectTexture* tempTexture = Assets::getObjectTexture("cell");
-		board.onBoard.emplace_back(Objects::Piece(Objects::CELL, Objects::NONE, x, y, tempTexture->texture));
-		if (x == 8)
+		Objects::Piece newPiece(Objects::CELL, Objects::NONE, Assets::getObjectTexture("cell")->texture);
+		newPiece.sprite.setPosition(cellX * cellWidth, cellY * cellHeight);
+		newPiece.sprite.setScale(pieceScale, pieceScale);
+		board.onBoard.emplace_back(newPiece);
+		cellX++;
+		if (cellX >= 8)
 		{
-			x = 0;
 			cellX = 0;
-			y++;
-			cellY += cellHeight;
+			cellY++;
 		}
 	}
 }
 
 void Functions::sortPieceTextures()
 {
-	bool blackDone = false;
-	int colorIndex = 0;
-	int pieceIndex = 0;
 	std::vector<std::string>& currentSide = blackPieceOrder;
 	Functions::unsortedTextures = Assets::pieceTextures;
 	Assets::pieceTextures.clear();
-	while (!unsortedTextures.empty())
+	for (int colorIndex = 0; colorIndex < colorOrder.size(); colorIndex++)
 	{
-		for (auto& element : unsortedTextures)
+		for (int pieceIndex = 0; pieceIndex < currentSide.size(); pieceIndex++)
 		{
-			if (element->name.find("pawn") != 0)
+			for (int unsortedPiece = 0; unsortedPiece < unsortedTextures.size(); unsortedPiece++)
 			{
-				for (int i = 0; i < 8; i++)
+				if ((colorOrder[colorIndex] + currentSide[pieceIndex]) == unsortedTextures[unsortedPiece]->name)
 				{
-					Assets::pieceTextures.emplace_back(element);
+					Assets::pieceTextures.emplace_back(unsortedTextures[unsortedPiece]);
+					break;
 				}
-				if (colorIndex == 0)
-				{
-					colorIndex++;
-					currentSide = whitePieceOrder;
-				}
-			}
-			else if (element->name == (colorOrder[colorIndex] + currentSide[pieceIndex]))
-			{
-				Assets::pieceTextures.emplace_back(element);
 			}
 		}
+		currentSide = whitePieceOrder;
 	}
 }
 
-void Functions::splitTextureName(std::string& name, char color, std::string& rename)
+void Functions::splitTextureName(std::string& name, char& color, std::string& rename)
 {
 	color = name[0];
 	rename = name.substr(1, name.length());

@@ -3,8 +3,8 @@
 
 void Objects::Piece::deletePiece()
 {
-    Assets::ObjectTexture temp = *Assets::getObjectTexture("cell");
-    if(temp.name == noName)
+    Assets::ObjectTexture* temp = Assets::getObjectTexture("cell");
+    if(temp == nullptr)
     {
         std::cerr << "Failed to delete " << this->color << " " << this->name << std::endl;
     }
@@ -13,7 +13,7 @@ void Objects::Piece::deletePiece()
     this->isPinned = false;
     this->pinnedByIndex = noIndex;
     this->legalMoves.clear();
-    this->sprite.setTexture(temp.texture);
+    this->sprite.setTexture(temp->texture);
 }
 
 void Objects::Piece::setTexture(const sf::Texture& texture)
@@ -21,23 +21,19 @@ void Objects::Piece::setTexture(const sf::Texture& texture)
     this->sprite.setTexture(texture);
 }
 
-Objects::Piece::Piece(PieceName name, PieceColor color, int x, int y)
+Objects::Piece::Piece(PieceName name, PieceColor color)
 {
     this->name = name;
     this->color = color;
-    this->x = x;
-    this->y = y;
     this->firstMove = true;
     this->isPinned = false;
     this->pinnedByIndex = noIndex;
 }
 
-Objects::Piece::Piece(PieceName name, PieceColor color, int x, int y, const sf::Texture& texture)
+Objects::Piece::Piece(PieceName name, PieceColor color, const sf::Texture& texture)
 {
     this->name = name;
     this->color = color;
-    this->x = x;
-    this->y = y;
     this->firstMove = true;
     this->isPinned = false;
     this->pinnedByIndex = noIndex;

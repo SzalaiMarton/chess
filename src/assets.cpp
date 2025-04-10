@@ -1,4 +1,3 @@
-// assets.cpp
 #include "assets.h"
 #include <iostream>
 #include <filesystem>
@@ -32,7 +31,7 @@ bool Assets::loadImage(const std::string& path, const std::string& name, sf::Tex
 
 void Assets::loadDirectoryElements(const std::string& path)
 {
-    std::vector<std::string> contents = Assets::getDirectoryContents(pathToPieceTextures);
+    std::vector<std::string> contents = Assets::getDirectoryContents(path);
     for (const auto& text : contents)
     {
         sf::Texture temp;
@@ -68,11 +67,6 @@ std::vector<std::string> Assets::getDirectoryContents(const std::string& path) {
     }
 
     return contents;
-}
-
-Assets::ObjectTexture::ObjectTexture()
-{
-    this->name = noName;
 }
 
 Assets::ObjectTexture::ObjectTexture(const std::string& name, sf::Texture& texture)

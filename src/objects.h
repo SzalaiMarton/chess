@@ -47,8 +47,8 @@ public:
         sf::Sprite sprite;
         std::vector<std::vector<Indicator>> legalMoves;
 
-        Piece(PieceName name, PieceColor color, int x, int y);
-        Piece(PieceName name, PieceColor color, int x, int y, const sf::Texture&);
+        Piece(PieceName name, PieceColor color);
+        Piece(PieceName name, PieceColor color, const sf::Texture&);
 
         void deletePiece();
         void setTexture(const sf::Texture& texture);

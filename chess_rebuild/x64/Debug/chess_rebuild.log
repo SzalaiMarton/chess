@@ -1,2 +1,5 @@
-﻿  main.cpp
-  chess_rebuild.vcxproj -> C:\Users\mazde\Desktop\code\chess_rebuild\x64\Debug\chess_rebuild.exe
+﻿  objects.cpp
+  settings.cpp
+  Generating Code...
+C:\Users\szala\Desktop\code\chess_rebuild\src\objects.cpp(96,1): warning C4715: 'Objects::convertCharToPieceColor': not all control paths return a value
+  chess_rebuild.vcxproj -> C:\Users\szala\Desktop\code\chess_rebuild\x64\Debug\chess_rebuild.exe

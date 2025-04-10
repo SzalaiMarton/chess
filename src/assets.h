@@ -19,7 +19,6 @@ public:
         std::string name;
         sf::Texture texture;
 
-        ObjectTexture();
         ObjectTexture(const std::string& name, sf::Texture& texture);
     };
 
