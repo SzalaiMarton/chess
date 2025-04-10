@@ -1,9 +1,6 @@
 #include <iostream>
 #include "SFML/Graphics.hpp"
-#include "assets.h"
 #include "functions.h"
-#include "objects.h"
-#include "settings.h"
 
 sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), windowTitle);
 
@@ -12,7 +9,7 @@ int main()
     Assets::loadDirectoryElements(pathToOtherTextures);
     Assets::loadDirectoryElements(pathToPieceTextures);
 
-    Assets::ObjectTexture boardTexture = Assets::getObjectTexture("board");
+    Assets::ObjectTexture boardTexture = *Assets::getObjectTexture("board");
     Objects::Board chessBoard(&boardTexture);
 
     window.setFramerateLimit(fps);
@@ -30,7 +27,7 @@ int main()
             {
                 window.close();
             }
-            Functions::refreshFrame(window, chessBoard);
+            //Functions::refreshFrame(window, chessBoard);
         }
     }
     return 0;

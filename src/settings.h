@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include <string>
+#include <vector>
 
 const int windowWidth = 800;
 const int windowHeight = windowWidth * (16 / 9);
@@ -12,9 +13,9 @@ const int cellHeight = (windowHeight - 36) / 8;
 const int fps = 60;
 const int noIndex = -1;
 
-std::vector<std::string> whitePieceOrder = { "pawn", "rook", "knight", "bishop", "queen", "king", "bishop", "kinght", "rook" };
-std::vector<std::string> blackPieceOrder = { "rook", "knight", "bishop", "king", "queen", "bishop", "kinght", "rook", "pawn" };
-const std::vector<char> colorOrder = { "b", "w" };
+extern std::vector<std::string> whitePieceOrder;
+extern std::vector<std::string> blackPieceOrder;
+extern std::vector<char> colorOrder;
 
 const std::string noName = "null";
 const std::string pathToPieceTextures = "res\\textures\\piece_textures";

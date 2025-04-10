@@ -3,7 +3,7 @@
 
 void Objects::Piece::deletePiece()
 {
-    Assets::ObjectTexture temp = Assets::getObjectTexture("cell");
+    Assets::ObjectTexture temp = *Assets::getObjectTexture("cell");
     if(temp.name == noName)
     {
         std::cerr << "Failed to delete " << this->color << " " << this->name << std::endl;

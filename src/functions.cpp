@@ -1,6 +1,6 @@
 #include "functions.h"
 
-std::vector<Assets::ObjectTexture> Functions::unsortedTextures;
+std::vector<Assets::ObjectTexture*> Functions::unsortedTextures;
 
 void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board)
 {
@@ -28,13 +28,17 @@ void Functions::placePieces(Objects::Board& board)
 		if (y == 3)
 		{
 			Functions::fillBlankWithCells(32, 0, y, board);
+			y = 6;
 		}
 		for (int x = 0; x < 8; x++)
 		{
 			std::string name = "asd";
 			char color = 'w';
-			Functions::splitTextureName(Assets::pieceTextures[index].name, color, name);
-			board.onBoard.emplace_back(new Objects::Piece(Objects::convertStringToPieceName(name), Objects::convertCharToPieceColor(color), x, y, Assets::getObjectTexture(name).texture));
+			std::cout << Assets::pieceTextures[index]->name;
+			Functions::splitTextureName(Assets::pieceTextures[index]->name, color, name);
+			Assets::ObjectTexture* tempTexture = Assets::getObjectTexture(name);
+			Objects::Piece newPiece(Objects::convertStringToPieceName(name), Objects::convertCharToPieceColor(color), x, y, tempTexture->texture);
+			board.onBoard.emplace_back(newPiece);
 			index++;
 			cellX += cellWidth;
 		}
@@ -43,13 +47,14 @@ void Functions::placePieces(Objects::Board& board)
 	}
 }
 
-void Functions::fillBlankWithCells(int ammount, int x, int y, Objects::Board& board)
+void Functions::fillBlankWithCells(int amount, int x, int y, Objects::Board& board)
 {
 	int cellX = cellWidth * x;
 	int cellY = cellHeight * y;
-	for (int index = 0; index < ammount; index++)
+	for (int index = 0; index < amount; index++)
 	{
-		board.onBoard.emplace_back(new Objects::Piece(Objects::CELL, Objects::NONE, x, y, Assets::getObjectTexture("cell").texture));
+		Assets::ObjectTexture* tempTexture = Assets::getObjectTexture("cell");
+		board.onBoard.emplace_back(Objects::Piece(Objects::CELL, Objects::NONE, x, y, tempTexture->texture));
 		if (x == 8)
 		{
 			x = 0;
@@ -72,11 +77,11 @@ void Functions::sortPieceTextures()
 	{
 		for (auto& element : unsortedTextures)
 		{
-			if (element.name.find("pawn") != 0)
+			if (element->name.find("pawn") != 0)
 			{
 				for (int i = 0; i < 8; i++)
 				{
-					Assets::pieceTextures.emplace_back(element.name);
+					Assets::pieceTextures.emplace_back(element);
 				}
 				if (colorIndex == 0)
 				{
@@ -84,9 +89,9 @@ void Functions::sortPieceTextures()
 					currentSide = whitePieceOrder;
 				}
 			}
-			else if (element.name == (colorOrder[colorIndex] + currentSide[pieceIndex]))
+			else if (element->name == (colorOrder[colorIndex] + currentSide[pieceIndex]))
 			{
-				Assets::pieceTextures.emplace_back(element.name);
+				Assets::pieceTextures.emplace_back(element);
 			}
 		}
 	}

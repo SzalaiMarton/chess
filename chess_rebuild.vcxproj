@@ -147,6 +147,7 @@
     <ClCompile Include="src\functions.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\objects.cpp" />
+    <ClCompile Include="src\settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\assets.h" />

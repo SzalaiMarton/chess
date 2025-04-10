@@ -14,8 +14,7 @@ public:
     static void sortPieceTextures();
     static void splitTextureName(std::string&, char, std::string&);
 
-    static std::vector<Assets::ObjectTexture> unsortedTextures;
-
+    static std::vector<Assets::ObjectTexture*> unsortedTextures;
 };
 
 #endif

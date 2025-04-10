@@ -1,26 +1,28 @@
+// assets.cpp
 #include "assets.h"
+#include <iostream>
+#include <filesystem>
 
-static std::vector<Assets::ObjectTexture> pieceTextures;
-static std::vector<Assets::ObjectTexture> otherTextures;
+std::vector<Assets::ObjectTexture*> Assets::pieceTextures;
+std::vector<Assets::ObjectTexture*> Assets::otherTextures;
 
-
-Assets::ObjectTexture Assets::getObjectTexture(const std::string& name)
+Assets::ObjectTexture* Assets::getObjectTexture(const std::string& name)
 {
-    for(auto &texture : Assets::pieceTextures)
+    for(auto& texture : Assets::pieceTextures)
     {
-        if(texture.name == name)
+        if(texture->name == name)
         {
             return texture;
         }
     }
     for (auto& texture : Assets::otherTextures)
     {
-        if (texture.name == name)
+        if (texture->name == name)
         {
             return texture;
         }
     }
-    return *new Assets::ObjectTexture();
+    return nullptr;
 }
 
 bool Assets::loadImage(const std::string& path, const std::string& name, sf::Texture& texture)
@@ -30,7 +32,7 @@ bool Assets::loadImage(const std::string& path, const std::string& name, sf::Tex
 
 void Assets::loadDirectoryElements(const std::string& path)
 {
-    std::vector<std::string> contents = Assets::getDirectoryContents(path);
+    std::vector<std::string> contents = Assets::getDirectoryContents(pathToPieceTextures);
     for (const auto& text : contents)
     {
         sf::Texture temp;
@@ -39,13 +41,14 @@ void Assets::loadDirectoryElements(const std::string& path)
             std::cerr << "Couldn't load " + text.substr(0, text.size()-4) << std::endl;
             continue;
         }
-        if (path.find("other") != 0)
+        Assets::ObjectTexture* newTexture = new Assets::ObjectTexture(text.substr(path.length() + 1, text.find(".") - path.length() - 1), temp);
+        if (path == pathToOtherTextures)
         {
-            Assets::otherTextures.emplace_back(new Assets::ObjectTexture(text.substr(path.length() + 1, text.find(".") - path.length() - 1), temp));
+            Assets::otherTextures.emplace_back(newTexture);
         }
         else
         {
-            Assets::pieceTextures.emplace_back(new Assets::ObjectTexture(text.substr(path.length() + 1, text.find(".") - path.length() - 1), temp));
+            Assets::pieceTextures.emplace_back(newTexture);
         }
     }
 }
