@@ -1,5 +1,12 @@
-﻿  objects.cpp
-  settings.cpp
-  Generating Code...
-C:\Users\szala\Desktop\code\chess_rebuild\src\objects.cpp(96,1): warning C4715: 'Objects::convertCharToPieceColor': not all control paths return a value
+﻿  main.cpp
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(38,74): warning C4244: '=': conversion from 'const T' to 'int', possible loss of data
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(38,74): warning C4244:         with
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(38,74): warning C4244:         [
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(38,74): warning C4244:             T=float
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(38,74): warning C4244:         ]
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(39,74): warning C4244: '=': conversion from 'const T' to 'int', possible loss of data
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(39,74): warning C4244:         with
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(39,74): warning C4244:         [
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(39,74): warning C4244:             T=float
+C:\Users\szala\Desktop\code\chess_rebuild\src\main.cpp(39,74): warning C4244:         ]
   chess_rebuild.vcxproj -> C:\Users\szala\Desktop\code\chess_rebuild\x64\Debug\chess_rebuild.exe

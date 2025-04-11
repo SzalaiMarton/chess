@@ -13,18 +13,19 @@ public:
 
     enum PieceColor
     {
-        WHITE = 'w',
-        BLACK = 'b',
-        NONE = 'n',
+        WHITE,
+        BLACK,
+        NONE,
+        INVALID
     };
 
     enum PieceName
     {
-        KING = 0,
-        QUEEN = 1,
+        ROOK = 0,
+        KNIGHT = 1,
         BISHOP = 2,
-        KNIGHT = 3,
-        ROOK = 4,
+        KING = 3,
+        QUEEN = 4,
         PAWN = 5,
         CELL = 6
     };
@@ -38,15 +39,14 @@ public:
     class Piece
     {
     public:
-        int x, y;
         bool firstMove;
         bool isPinned;
-        int pinnedByIndex;
         PieceColor color;
         PieceName name;
         sf::Sprite sprite;
         std::vector<std::vector<Indicator>> legalMoves;
 
+        Piece();
         Piece(PieceName name, PieceColor color);
         Piece(PieceName name, PieceColor color, const sf::Texture&);
 
@@ -59,14 +59,18 @@ public:
     public:
         sf::Sprite sprite;
         std::vector<Piece> onBoard;
+        std::vector<std::vector<float>> tilePoints;
         void removePiece(Piece*);
 
         Board(Assets::ObjectTexture*);
+        void createTiles();
+        Objects::Piece* getPiece(sf::Vector2i& mousePos, Objects::Piece* skipPiece = nullptr);
+        void snapPieceToTile(Objects::Piece& piece, int x = -1, int y = -1);
     };
 
-    static std::string getPieceNameString(Objects::PieceName);
     static PieceName convertStringToPieceName(std::string&);
     static PieceColor convertCharToPieceColor(char);
+    static Piece noPiece;
 };
 
 #endif

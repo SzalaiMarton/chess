@@ -2,14 +2,22 @@
 
 std::vector<Assets::ObjectTexture*> Functions::unsortedTextures;
 
-void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board)
+void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, Objects::Piece* piece)
 {
     window.clear();
     window.draw(board.sprite);
-    for (auto &obj : board.onBoard)
+    for (auto& obj : board.onBoard)
     {
+		if (piece == &obj)
+		{
+			continue;
+		}
         window.draw(obj.sprite);
     }
+	if (piece != nullptr)
+	{
+		window.draw(piece->sprite);
+	}
     window.display();
 }
 
@@ -21,56 +29,49 @@ void Functions::initGame(Objects::Board& board)
 
 void Functions::placePieces(Objects::Board& board)
 {
-	int cellX = 0;
-	int cellY = 0;
+	int index = 0;
 	for (auto& texture : Assets::pieceTextures)
 	{
 		char color;
 		std::string name;
 		Functions::splitTextureName(texture->name, color, name);
 		Objects::Piece newPiece(Objects::convertStringToPieceName(name), Objects::convertCharToPieceColor(color), texture->texture);
-		newPiece.sprite.setPosition(cellX*cellWidth, cellY*cellHeight);
+		newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
+		newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
 		newPiece.sprite.setScale(pieceScale, pieceScale);
 		if (name == "pawn")
 		{
 			for (int i = 0; i < 8; i++)
 			{
-				newPiece.sprite.setPosition(i * cellWidth, cellY * cellHeight);
+				newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
+				newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
 				board.onBoard.emplace_back(newPiece);
-				cellX = 7;
+				index++;
 			}
+			index--; //correction
 		}
 		else
 		{
 			board.onBoard.emplace_back(newPiece);
 		}
-		cellX++;
-		if (cellX >= 8)
+		index++;
+		if (index == 16)
 		{
-			cellX = 0;
-			cellY++;
-		}
-		if (cellY == 2)
-		{
-			Functions::fillBlankWithCells(32, cellX, cellY, board);
+			Functions::fillBlankWithCells(32, index, board);
 		}
 	}
 }
 
-void Functions::fillBlankWithCells(int amount, int& cellX, int& cellY, Objects::Board& board)
+void Functions::fillBlankWithCells(int amount, int& index, Objects::Board& board)
 {
 	for (int i = 0; i < amount; i++)
 	{
 		Objects::Piece newPiece(Objects::CELL, Objects::NONE, Assets::getObjectTexture("cell")->texture);
-		newPiece.sprite.setPosition(cellX * cellWidth, cellY * cellHeight);
+		newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
+		newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
 		newPiece.sprite.setScale(pieceScale, pieceScale);
 		board.onBoard.emplace_back(newPiece);
-		cellX++;
-		if (cellX >= 8)
-		{
-			cellX = 0;
-			cellY++;
-		}
+		index++;
 	}
 }
 
@@ -96,8 +97,36 @@ void Functions::sortPieceTextures()
 	}
 }
 
-void Functions::splitTextureName(std::string& name, char& color, std::string& rename)
+void Functions::splitTextureName(std::string& initname, char& recolor, std::string& rename)
 {
-	color = name[0];
-	rename = name.substr(1, name.length());
+	recolor = initname[0];
+	rename = initname.substr(1, initname.length());
+}
+
+bool Functions::isNameInRange(Objects::PieceName& name)
+{
+	if (pieceNameRange[0] < name && pieceNameRange[pieceNameRange.size()-1] > name)
+	{
+		return true;
+	}
+	return false;
+}
+
+void Functions::hidePiece(sf::RenderWindow& window, Objects::Board& board, Objects::Piece* piece)
+{
+	window.clear();
+	window.draw(board.sprite);
+	if (piece != nullptr)
+	{
+		window.draw(piece->sprite);
+	}
+	for (auto& obj : board.onBoard)
+	{
+		if (piece == &obj)
+		{
+			continue;
+		}
+		window.draw(obj.sprite);
+	}
+	window.display();
 }
