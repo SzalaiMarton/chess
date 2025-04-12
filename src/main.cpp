@@ -55,6 +55,7 @@ int main()
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 targetPiece = chessBoard.getPiece(mousePos, currentPiece);
                 chessBoard.snapPieceToTile(*currentPiece);
+                std::cout << targetPiece->name << std::endl;
                 if (targetPiece->color == currentPiece->color)
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
