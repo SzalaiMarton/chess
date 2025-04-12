@@ -1,9 +1,0 @@
-﻿  assets.cpp
-  functions.cpp
-  main.cpp
-  objects.cpp
-  Generating code
-  Previous IPDB not found, fall back to full compilation.
-  All 688 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  chess_rebuild.vcxproj -> C:\Users\mazde\Desktop\code\chess_rebuild\x64\Release\chess_rebuild.exe
