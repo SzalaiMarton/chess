@@ -1,46 +1,42 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\",
+  "WorkspaceRootPath": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\functions.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\functions.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\objects.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\objects.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\objects.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\objects.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\objects.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\functions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\functions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\functions.h||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\functions.h||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\settings.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\settings.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\settings.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\settings.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\functions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\functions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\assets.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\assets.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\settings.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\settings.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\todo||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\todo||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\objects.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\objects.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\assets.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\assets.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\assets.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\assets.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{431054BA-9102-4002-81E5-6C304E249E9F}|chess_rebuild.vcxproj|solutionrelative:src\\assets.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -50,134 +46,123 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "todo",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\todo",
-              "RelativeDocumentMoniker": "src\\todo",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\todo",
-              "RelativeToolTip": "src\\todo",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-04-11T14:44:07.809Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "settings.cpp",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\settings.cpp",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\settings.cpp",
               "RelativeDocumentMoniker": "src\\settings.cpp",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\settings.cpp",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\settings.cpp",
               "RelativeToolTip": "src\\settings.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA4AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-04-10T12:43:19.004Z",
+              "WhenOpened": "2025-04-12T10:55:32.772Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "settings.h",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\settings.h",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\settings.h",
               "RelativeDocumentMoniker": "src\\settings.h",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\settings.h",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\settings.h",
               "RelativeToolTip": "src\\settings.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAArAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-04-04T17:06:11.853Z",
+              "WhenOpened": "2025-04-12T10:55:33.569Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "functions.cpp",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\functions.cpp",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\functions.cpp",
               "RelativeDocumentMoniker": "src\\functions.cpp",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\functions.cpp",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\functions.cpp",
               "RelativeToolTip": "src\\functions.cpp",
-              "ViewState": "AgIAADkAAAAAAAAAAAAAADwAAAADAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-04-04T14:16:23.675Z",
+              "WhenOpened": "2025-04-12T10:55:30.636Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "functions.h",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\functions.h",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\functions.h",
               "RelativeDocumentMoniker": "src\\functions.h",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\functions.h",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\functions.h",
               "RelativeToolTip": "src\\functions.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABLAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-04-04T14:16:39.84Z",
+              "WhenOpened": "2025-04-12T10:55:34.751Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "assets.cpp",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\assets.cpp",
-              "RelativeDocumentMoniker": "src\\assets.cpp",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\assets.cpp",
-              "RelativeToolTip": "src\\assets.cpp",
-              "ViewState": "AgIAABYAAAAAAAAAAAAcwB0AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-03-22T17:39:15.895Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "assets.h",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\assets.h",
-              "RelativeDocumentMoniker": "src\\assets.h",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\assets.h",
-              "RelativeToolTip": "src\\assets.h",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABUAAAAYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-03-22T18:22:53.719Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "objects.cpp",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\objects.cpp",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\objects.cpp",
               "RelativeDocumentMoniker": "src\\objects.cpp",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\objects.cpp",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\objects.cpp",
               "RelativeToolTip": "src\\objects.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-03-22T18:04:02.619Z",
+              "WhenOpened": "2025-04-12T10:55:32.108Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "objects.h",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\objects.h",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\objects.h",
               "RelativeDocumentMoniker": "src\\objects.h",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\objects.h",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\objects.h",
               "RelativeToolTip": "src\\objects.h",
-              "ViewState": "AgIAAC4AAAAAAAAAAAAQwEIAAAAhAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-03-22T18:04:27.636Z",
+              "WhenOpened": "2025-04-12T10:55:34.16Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\main.cpp",
-              "RelativeDocumentMoniker": "src\\main.cpp",
-              "ToolTip": "C:\\Users\\szala\\Desktop\\code\\chess_rebuild\\src\\main.cpp",
-              "RelativeToolTip": "src\\main.cpp",
-              "ViewState": "AgIAACcAAAAAAAAAAAAAADgAAAAQAAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "assets.cpp",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\assets.cpp",
+              "RelativeDocumentMoniker": "src\\assets.cpp",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\assets.cpp",
+              "RelativeToolTip": "src\\assets.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-04-10T12:37:44.693Z",
+              "WhenOpened": "2025-04-12T10:55:28.961Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "assets.h",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\assets.h",
+              "RelativeDocumentMoniker": "src\\assets.h",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\assets.h",
+              "RelativeToolTip": "src\\assets.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-04-12T10:55:35.325Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\main.cpp",
+              "RelativeDocumentMoniker": "src\\main.cpp",
+              "ToolTip": "C:\\Users\\mazde\\Desktop\\code\\chess_rebuild\\src\\main.cpp",
+              "RelativeToolTip": "src\\main.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-12T10:55:31.425Z",
               "EditorCaption": ""
             }
           ]
