@@ -14,7 +14,7 @@ const int windowHeight = windowWidth * (16 / 9);
 const std::string windowTitle = "chess";
 const float boardScale = windowWidth / boardTextureWidth;
 const float cellWidth = (windowWidth - 36) / 8;
-const float cellHeight = (windowHeight - 26) / 8;
+const float cellHeight = (windowHeight - 36) / 8;
 const float pieceScale = cellWidth / pieceTextureWidth;
 const int fps = 60;
 const int noIndex = -1;
@@ -22,8 +22,6 @@ const int noIndex = -1;
 extern std::vector<std::string> whitePieceOrder;
 extern std::vector<std::string> blackPieceOrder;
 extern std::vector<char> colorOrder;
-
-extern std::vector<int> pieceNameRange;
 
 const std::string pathToPieceTextures = "res\\textures\\piece_textures";
 const std::string pathToOtherTextures = "res\\textures\\other_textures";

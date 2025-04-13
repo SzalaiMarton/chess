@@ -8,6 +8,7 @@ void Objects::Piece::deletePiece()
     if (temp == nullptr)
     {
         std::cerr << "Failed to delete " << this->color << " " << this->name << std::endl;
+        return;
     }
     
     this->name = PieceName::CELL;
@@ -69,9 +70,13 @@ Objects::PieceName Objects::convertStringToPieceName(std::string& name)
     {
         return Objects::PAWN;
     }
-    else
+    else if (name == "cell")
     {
         return Objects::CELL;
+    }
+    else
+    {
+        return Objects::INVALID_NAME;
     }
 }
 
@@ -82,7 +87,7 @@ Objects::PieceColor Objects::convertCharToPieceColor(char color)
         case 'w': return Objects::WHITE;
         case 'b': return Objects::BLACK;
         case 'n': return Objects::NONE;
-        default: return Objects::INVALID;
+        default: return Objects::INVALID_COLOR;
     }
 }
 
@@ -90,7 +95,7 @@ void Objects::Board::snapPieceToTile(Objects::Piece& piece, int x, int y)
 {
     //get the piece pos and snap it to the closest tile
     //to get the closest tile: get the distance between piece and current tile the compare that with a range and see if its in it
-    int posX, posY;
+    int posX{}, posY{};
     if (x != -1 && y != -1)
     {
         piece.sprite.setPosition(x, y);
@@ -130,7 +135,7 @@ void Objects::Board::createTiles()
     {
         for (int x = 0; x < 8; x++)
         {
-            this->tilePoints.push_back({ currentX + (cellWidth * x), currentY + (cellHeight*y) });
+            this->tilePoints.push_back({ currentX + (cellWidth * (float)x), currentY + (cellHeight * (float)y) });
         }
     }
 }
@@ -148,4 +153,5 @@ Objects::Piece* Objects::Board::getPiece(sf::Vector2i& mousePos, Objects::Piece*
             return &piece;
         }
     }
+    return nullptr;
 }

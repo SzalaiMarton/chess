@@ -105,28 +105,24 @@ void Functions::splitTextureName(std::string& initname, char& recolor, std::stri
 
 bool Functions::isNameInRange(Objects::PieceName& name)
 {
-	if (pieceNameRange[0] < name && pieceNameRange[pieceNameRange.size()-1] > name)
+	if (Objects::ROOK <= name && Objects::INVALID_NAME > name)
 	{
 		return true;
 	}
 	return false;
 }
 
-void Functions::hidePiece(sf::RenderWindow& window, Objects::Board& board, Objects::Piece* piece)
+bool Functions::isPieceMatchTurn(Objects::Piece* piece, int turn)
 {
-	window.clear();
-	window.draw(board.sprite);
-	if (piece != nullptr)
+	Objects::PieceColor color{};
+	switch (turn)
 	{
-		window.draw(piece->sprite);
+	case 1: color = Objects::WHITE;
+	case -1: color = Objects::BLACK;
 	}
-	for (auto& obj : board.onBoard)
+	if (color == piece->color)
 	{
-		if (piece == &obj)
-		{
-			continue;
-		}
-		window.draw(obj.sprite);
+		return true;
 	}
-	window.display();
+	return false;
 }

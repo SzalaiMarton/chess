@@ -13,10 +13,10 @@ public:
 
     enum PieceColor
     {
-        WHITE,
-        BLACK,
-        NONE,
-        INVALID
+        WHITE = 1,
+        BLACK = -1,
+        NONE = 2,
+        INVALID_COLOR
     };
 
     enum PieceName
@@ -27,7 +27,8 @@ public:
         KING = 3,
         QUEEN = 4,
         PAWN = 5,
-        CELL = 6
+        CELL = 6,
+        INVALID_NAME = 7
     };
 
     struct Indicator

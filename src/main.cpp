@@ -8,8 +8,8 @@ int main()
 {
     Objects::Piece* currentPiece = nullptr;
     Objects::Piece* targetPiece = nullptr;
-    int currentPieceLastPosX, currentPieceLastPosY;
-
+    float currentPieceLastPosX{}, currentPieceLastPosY{};
+    int turn = 1; //1 -> white, -1 -> black
 
     Assets::loadDirectoryElements(pathToOtherTextures);
     Assets::loadDirectoryElements(pathToPieceTextures);
@@ -37,7 +37,7 @@ int main()
                 currentPiece = chessBoard.getPiece(mousePos);
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
-                if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name))
+                if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
                     while (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
@@ -47,27 +47,32 @@ int main()
                         Functions::refreshFrame(window, chessBoard, currentPiece);
                     }
                 }
+                else
+                {
+                    currentPiece = nullptr;
+                }
             }
 
-            if (event.type == sf::Event::MouseButtonReleased)
+
+            if (event.type == sf::Event::MouseButtonReleased && currentPiece != nullptr)
             {
-                //if none of the if statement's value is true then don't change the turn because the piece went back to the last pos by the player
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 targetPiece = chessBoard.getPiece(mousePos, currentPiece);
                 chessBoard.snapPieceToTile(*currentPiece);
-                std::cout << targetPiece->name << std::endl;
-                if (targetPiece->color == currentPiece->color)
+                if (targetPiece == nullptr || targetPiece->color == currentPiece->color)
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
-                else if (targetPiece->sprite.getPosition() == currentPiece->sprite.getPosition())
+                else if (targetPiece->name == Objects::CELL)
+                {
+                    chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
+                    turn * -1;
+                }
+                else if (targetPiece->color != currentPiece->color)
                 {
                     chessBoard.removePiece(targetPiece);
                     chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                }
-                else if (targetPiece->color == Objects::CELL)
-                {
-                    //just change turn
+                    turn * -1;
                 }
             }
 
