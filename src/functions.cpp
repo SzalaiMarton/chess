@@ -16,6 +16,19 @@ void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, Ob
     }
 	if (piece != nullptr)
 	{
+		if (!piece->legalMoves.empty())
+		{
+			for (auto& direction : piece->legalMoves)
+			{
+				for (auto& ind : direction)
+				{
+					if (ind != nullptr)
+					{
+						window.draw(ind->sprite);
+					}
+				}
+			}
+		}
 		window.draw(piece->sprite);
 	}
     window.display();
@@ -114,13 +127,7 @@ bool Functions::isNameInRange(Objects::PieceName& name)
 
 bool Functions::isPieceMatchTurn(Objects::Piece* piece, int turn)
 {
-	Objects::PieceColor color{};
-	switch (turn)
-	{
-	case 1: color = Objects::WHITE;
-	case -1: color = Objects::BLACK;
-	}
-	if (color == piece->color)
+	if (turn == piece->color)
 	{
 		return true;
 	}

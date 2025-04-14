@@ -11,6 +11,8 @@ class Objects
 {
 public:
 
+    class Board;
+
     enum PieceColor
     {
         WHITE = 1,
@@ -28,12 +30,24 @@ public:
         QUEEN = 4,
         PAWN = 5,
         CELL = 6,
-        INVALID_NAME = 7
+        INDICATOR = 7,
+        INVALID_NAME = 8
+    };
+
+    enum Directions
+    {
+        EAST = 0,
+        SOUTH = 1,
+        NORTH = 2,
+        WEST = 3,
+        NORTHWEST = 4,
+        NORTHEAST = 5,
+        SOUTHEAST = 6,
+        SOUTHWEST = 7
     };
 
     struct Indicator
     {
-        int x, y;
         sf::Sprite sprite;
     };
 
@@ -45,14 +59,19 @@ public:
         PieceColor color;
         PieceName name;
         sf::Sprite sprite;
-        std::vector<std::vector<Indicator>> legalMoves;
+        std::vector<std::vector<Indicator*>> legalMoves;
 
         Piece();
         Piece(PieceName name, PieceColor color);
         Piece(PieceName name, PieceColor color, const sf::Texture&);
 
+        void getLegalMoves(Objects::Board& board);
+        void checkPawnAttack(Objects::Board& board, int x, int direction); // x = -1 or 1 -> depends on the side
         void deletePiece();
+        void deleteLegalMoves();
         void setTexture(const sf::Texture& texture);
+        void createLegalMove(int direction, Objects::Piece* targetCell);
+        bool isTargetInMoves(Objects::Piece* target);
     };
 
     class Board
@@ -61,17 +80,21 @@ public:
         sf::Sprite sprite;
         std::vector<Piece> onBoard;
         std::vector<std::vector<float>> tilePoints;
-        void removePiece(Piece*);
+        void removePiece(Piece* piece);
 
-        Board(Assets::ObjectTexture*);
+        Board(Assets::ObjectTexture* texture);
         void createTiles();
         Objects::Piece* getPiece(sf::Vector2i& mousePos, Objects::Piece* skipPiece = nullptr);
-        void snapPieceToTile(Objects::Piece& piece, int x = -1, int y = -1);
+        void snapPieceToTile(Objects::Piece& piece, float x = -1.f, float y = -1.f);
     };
 
-    static PieceName convertStringToPieceName(std::string&);
-    static PieceColor convertCharToPieceColor(char);
+    static PieceName convertStringToPieceName(std::string& name);
+    static PieceColor convertCharToPieceColor(char color);
     static Piece noPiece;
+    static void getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, int& amount);
+    static void knightMoves(Objects::Piece* piece);
+    static void getDirectionMultiplier(Objects::Directions direction, int& x, int& y);
+    static bool isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, int direction);
 };
 
 #endif

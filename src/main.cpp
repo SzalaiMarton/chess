@@ -8,6 +8,7 @@ int main()
 {
     Objects::Piece* currentPiece = nullptr;
     Objects::Piece* targetPiece = nullptr;
+    Objects::Piece* prevPiece = nullptr;
     float currentPieceLastPosX{}, currentPieceLastPosY{};
     int turn = 1; //1 -> white, -1 -> black
 
@@ -33,17 +34,31 @@ int main()
         {
             if (event.type == sf::Event::MouseButtonPressed)
             {
+                if (currentPiece != nullptr)
+                {
+                    currentPiece->deleteLegalMoves();
+                }
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 currentPiece = chessBoard.getPiece(mousePos);
+                if (currentPiece == nullptr)
+                {
+                    continue;
+                }
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
+                    currentPiece->getLegalMoves(chessBoard);
+                    prevPiece = currentPiece;
                     while (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
                         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                         currentPiece->sprite.setPosition((float)mousePos.x, (float)mousePos.y);
-
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+                        {
+                            chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
+                            break;
+                        }
                         Functions::refreshFrame(window, chessBoard, currentPiece);
                     }
                 }
@@ -52,7 +67,6 @@ int main()
                     currentPiece = nullptr;
                 }
             }
-
 
             if (event.type == sf::Event::MouseButtonReleased && currentPiece != nullptr)
             {
@@ -63,16 +77,24 @@ int main()
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
-                else if (targetPiece->name == Objects::CELL)
+                else if (targetPiece->name == Objects::CELL && currentPiece->isTargetInMoves(targetPiece))
                 {
                     chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                    turn * -1;
+                    currentPiece->deleteLegalMoves();
+                    currentPiece->firstMove = false;
+                    turn *= -1;
                 }
-                else if (targetPiece->color != currentPiece->color)
+                else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece))
                 {
                     chessBoard.removePiece(targetPiece);
                     chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                    turn * -1;
+                    currentPiece->deleteLegalMoves();
+                    currentPiece->firstMove = false;
+                    turn *= -1;
+                }
+                else
+                {
+                    chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
             }
 
@@ -81,7 +103,14 @@ int main()
                 window.close();
             }
         }
-        Functions::refreshFrame(window, chessBoard);
+        if (currentPiece != nullptr)
+        {
+            Functions::refreshFrame(window, chessBoard, currentPiece);
+        }
+        else
+        {
+            Functions::refreshFrame(window, chessBoard);
+        }
     }
     return 0;
 }
