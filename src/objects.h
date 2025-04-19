@@ -49,6 +49,7 @@ public:
     struct Indicator
     {
         sf::Sprite sprite;
+        bool enpassant;
     };
 
     class Piece
@@ -56,6 +57,8 @@ public:
     public:
         bool firstMove;
         bool isPinned;
+        bool enpassantLeft;
+        bool enpassantRight;
         PieceColor color;
         PieceName name;
         sf::Sprite sprite;
@@ -70,8 +73,10 @@ public:
         void deletePiece();
         void deleteLegalMoves();
         void setTexture(const sf::Texture& texture);
-        void createLegalMove(int direction, Objects::Piece* targetCell);
+        void createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant = false);
         bool isTargetInMoves(Objects::Piece* target);
+        void resetPiece();
+        bool isMoveEnpassant();
     };
 
     class Board
@@ -84,15 +89,20 @@ public:
 
         Board(Assets::ObjectTexture* texture);
         void createTiles();
-        Objects::Piece* getPiece(sf::Vector2i& mousePos, Objects::Piece* skipPiece = nullptr);
+        Objects::Piece* getPieceByMouse(sf::Vector2i& mousePos, Objects::Piece* skipPiece = nullptr);
         void snapPieceToTile(Objects::Piece& piece, float x = -1.f, float y = -1.f);
+        bool isTargetOnBoard(Objects::Piece* piece);
+        void setAllEnpassantFalse();
+        void checkEnpassant(Objects::Piece* currentPiece);
+        void startingPosition();
+        Objects::Piece* checkPromotion();
     };
 
     static PieceName convertStringToPieceName(std::string& name);
     static PieceColor convertCharToPieceColor(char color);
     static Piece noPiece;
     static void getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, int& amount);
-    static void knightMoves(Objects::Piece* piece);
+    static void knightMoves(Objects::Piece* piece, Objects::Board& board);
     static void getDirectionMultiplier(Objects::Directions direction, int& x, int& y);
     static bool isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, int direction);
 };

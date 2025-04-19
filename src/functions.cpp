@@ -133,3 +133,8 @@ bool Functions::isPieceMatchTurn(Objects::Piece* piece, int turn)
 	}
 	return false;
 }
+
+void Functions::choosePieceForPromotion(Objects::Piece* piecePromoted) // make a window where the player can select the desired piece
+{
+
+}

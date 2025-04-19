@@ -3,17 +3,17 @@
 
 void Objects::Piece::getLegalMoves(Objects::Board& board)
 {
+    if (this->name == Objects::KNIGHT)
+    {
+        Objects::knightMoves(this, board);
+        return;
+    }
     int multiplierX{}, multiplierY{};
     sf::Vector2i cell{};
     Objects::Piece* targetCell{};
     std::vector<Objects::Directions> directions;
     int amount{};
     Objects::getMoveProperties(this, directions, amount);
-    if (directions.empty())
-    {
-        Objects::knightMoves(this);
-        return;
-    }
     this->legalMoves.resize(directions.size());
     if (this->name == Objects::PAWN && !this->firstMove)
     {
@@ -35,7 +35,7 @@ void Objects::Piece::getLegalMoves(Objects::Board& board)
         {
             cell.x = cell.x + (cellWidth * multiplierX);
             cell.y = cell.y + (cellHeight * multiplierY);
-            targetCell = board.getPiece(cell);
+            targetCell = board.getPieceByMouse(cell);
             if (!Objects::isTargetCellValid(targetCell, this, direction))
             {
                 break;
@@ -81,11 +81,19 @@ void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction
         y = -1;
     }
     cell.x = this->sprite.getPosition().x + (cellWidth * x);
-    cell.y = this->sprite.getPosition().y + (cellWidth * y);
-    Objects::Piece* targetCell = board.getPiece(cell);
-    if (targetCell != nullptr && targetCell->color != this->color && targetCell->color != Objects::NONE)
+    cell.y = this->sprite.getPosition().y + (cellHeight * y);
+    Objects::Piece* targetCell = board.getPieceByMouse(cell);
+    if (targetCell != nullptr)
     {
-        if (targetCell->color != this->color && targetCell->color != Objects::NONE)
+        if ((targetCell->color != this->color || targetCell->color == Objects::NONE) && this->enpassantRight && x == 1)
+        {
+            this->createLegalMove(direction, targetCell, true);
+        }
+        else if ((targetCell->color != this->color || targetCell->color == Objects::NONE) && this->enpassantLeft && x == -1)
+        {
+            this->createLegalMove(direction, targetCell, true);
+        }
+        else if (targetCell->color != this->color && targetCell->color != Objects::NONE)
         {
             this->createLegalMove(direction, targetCell);
         }
@@ -98,12 +106,58 @@ void Objects::Piece::deleteLegalMoves()
     this->legalMoves.clear();
 }
 
-void Objects::knightMoves(Objects::Piece* piece)
+void Objects::knightMoves(Objects::Piece* piece, Objects::Board& board)
 {
-
+    std::vector<Directions> directions;
+    int amount{};
+    int multiplierX{}, multiplierY{};
+    int offsetX{}, offsetY{};
+    sf::Vector2i cell{};
+    Objects::Piece* targetCell{};
+    Objects::getMoveProperties(piece, directions, amount);
+    piece->legalMoves.resize(directions.size());
+    for (auto& direction : directions)
+    {
+        cell.x = (int)piece->sprite.getPosition().x;
+        cell.y = (int)piece->sprite.getPosition().y;
+        multiplierX = 0; multiplierY = 0;
+        offsetX = 0; offsetY = 0;
+        Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
+        multiplierX *= 2; multiplierY *= 2;
+        if (multiplierX == 0)
+        {
+            offsetX = cellWidth;
+            offsetY = 0;
+        }
+        else if (multiplierY == 0)
+        {
+            offsetX = 0;
+            offsetY = cellHeight;
+        }
+        for (int i = 0; i < 2; i++)
+        {
+            cell.x = (int)piece->sprite.getPosition().x;
+            cell.y = (int)piece->sprite.getPosition().y; 
+            if (i == 1)
+            {
+                offsetX *= -1; offsetY *= -1;
+            }
+            cell.x += (cellWidth * multiplierX) + offsetX;
+            cell.y += (cellHeight * multiplierY) + offsetY;
+            targetCell = board.getPieceByMouse(cell);
+            if (board.isTargetOnBoard(targetCell))
+            {
+                Objects::isTargetCellValid(targetCell, piece, direction);
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
 }
 
-void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell)
+void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant)
 {
     Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
     if (indicatorTexture == nullptr)
@@ -113,6 +167,7 @@ void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell)
     Objects::Indicator* legalMove = new Objects::Indicator();
     legalMove->sprite = targetCell->sprite;
     legalMove->sprite.setTexture(indicatorTexture->texture);
+    legalMove->enpassant = enpassant;
     this->legalMoves[direction].emplace_back(legalMove);
 }
 
@@ -129,6 +184,29 @@ bool Objects::Piece::isTargetInMoves(Objects::Piece* target)
         }
     }
     return false;
+}
+
+void Objects::Piece::resetPiece()
+{
+    this->enpassantLeft = false;
+    this->enpassantRight = false;
+    this->firstMove = true;
+    this->isPinned = false;
+    this->legalMoves.clear();
+}
+
+bool Objects::Piece::isMoveEnpassant()
+{
+    for (auto& dir : this->legalMoves)
+    {
+        for (auto& move : dir)
+        {
+            if (move->sprite.getPosition() == this->sprite.getPosition())
+            {
+                return move->enpassant;
+            }
+        }
+    }
 }
 
 void Objects::getDirectionMultiplier(Objects::Directions direction, int& x, int& y)
@@ -197,6 +275,8 @@ Objects::Piece::Piece()
     this->color = Objects::INVALID_COLOR;
     this->firstMove = false;
     this->isPinned = false;
+    this->enpassantLeft = false;
+    this->enpassantRight = false;
 }
 
 Objects::Piece::Piece(PieceName name, PieceColor color)
@@ -205,6 +285,8 @@ Objects::Piece::Piece(PieceName name, PieceColor color)
     this->color = color;
     this->firstMove = true;
     this->isPinned = false;
+    this->enpassantLeft = false;
+    this->enpassantRight = false;
 }
 
 Objects::Piece::Piece(PieceName name, PieceColor color, const sf::Texture& texture)
@@ -214,6 +296,8 @@ Objects::Piece::Piece(PieceName name, PieceColor color, const sf::Texture& textu
     this->firstMove = true;
     this->isPinned = false;
     this->setTexture(texture);
+    this->enpassantLeft = false;
+    this->enpassantRight = false;
 }
 
 Objects::PieceName Objects::convertStringToPieceName(std::string& name)
@@ -307,6 +391,12 @@ void Objects::getMoveProperties(Objects::Piece* piece, std::vector<Objects::Dire
             amount = 8;
             break;
         }
+        case Objects::KNIGHT:
+        {
+            directions = { Objects::NORTH, Objects::WEST, Objects::EAST, Objects::SOUTH };
+            amount = 0;
+            break;
+        }
     }
 }
 
@@ -331,6 +421,31 @@ void Objects::Board::snapPieceToTile(Objects::Piece& piece, float x, float y)
                 piece.sprite.setPosition(tile[0], tile[1]);
                 return;
             }
+        }
+    }
+}
+
+bool Objects::Board::isTargetOnBoard(Objects::Piece* piece)
+{
+    if (piece == nullptr)
+    {
+        return false;
+    }
+    if ((piece->sprite.getPosition().x < 0 || piece->sprite.getPosition().x > windowWidth) && (piece->sprite.getPosition().y < 0 || piece->sprite.getPosition().y > windowHeight))
+    {
+        return false;
+    }
+    return true;
+}
+
+void Objects::Board::setAllEnpassantFalse()
+{
+    for (auto& piece : this->onBoard)
+    {
+        if (piece.name == Objects::PAWN)
+        {
+            piece.enpassantLeft = false;
+            piece.enpassantRight = false;
         }
     }
 }
@@ -360,7 +475,7 @@ void Objects::Board::createTiles()
     }
 }
 
-Objects::Piece* Objects::Board::getPiece(sf::Vector2i& mousePos, Objects::Piece* skipPiece)
+Objects::Piece* Objects::Board::getPieceByMouse(sf::Vector2i& mousePos, Objects::Piece* skipPiece)
 {
     for (auto& piece : this->onBoard)
     {
@@ -369,6 +484,53 @@ Objects::Piece* Objects::Board::getPiece(sf::Vector2i& mousePos, Objects::Piece*
             continue;
         }
         if (piece.sprite.getGlobalBounds().contains((float)(mousePos.x), (float)(mousePos.y)))
+        {
+            return &piece;
+        }
+    }
+    return nullptr;
+}
+
+void Objects::Board::checkEnpassant(Objects::Piece* currentPiece)
+{
+    if (!currentPiece->firstMove)
+    {
+        return;
+    }
+    sf::Vector2i cell{};
+    Objects::Piece* targetCell{};
+    cell.x = currentPiece->sprite.getPosition().x + cellWidth;
+    cell.y = currentPiece->sprite.getPosition().y;
+    targetCell = this->getPieceByMouse(cell);
+    if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE)
+    {
+        targetCell->enpassantLeft = true;
+    }
+    cell.x = currentPiece->sprite.getPosition().x - cellWidth;
+    targetCell = this->getPieceByMouse(cell);
+    if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE)
+    {
+        targetCell->enpassantRight = true;
+    }
+}
+
+void Objects::Board::startingPosition()
+{
+    for (int index = 0; index < this->tilePoints.size(); index++) // using the same index for two vector since the sizes are always the same
+    {
+        this->snapPieceToTile(this->onBoard[index], this->tilePoints[index][0], this->tilePoints[index][1]);
+        if (this->onBoard[index].name != Objects::CELL && this->onBoard[index].name != Objects::INVALID_NAME)
+        {
+            this->onBoard[index].resetPiece();
+        }
+    }
+}
+
+Objects::Piece* Objects::Board::checkPromotion()
+{
+    for (auto& piece : this->onBoard)
+    {
+        if (piece.name == Objects::PAWN && (piece.sprite.getPosition().y == this->tilePoints[0][1] || piece.sprite.getPosition().y == this->tilePoints[this->tilePoints.size()-1][1]))
         {
             return &piece;
         }

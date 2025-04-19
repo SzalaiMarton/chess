@@ -9,6 +9,7 @@ int main()
     Objects::Piece* currentPiece = nullptr;
     Objects::Piece* targetPiece = nullptr;
     Objects::Piece* prevPiece = nullptr;
+    Objects::Piece* toBePromoted = nullptr;
     float currentPieceLastPosX{}, currentPieceLastPosY{};
     int turn = 1; //1 -> white, -1 -> black
 
@@ -39,7 +40,7 @@ int main()
                     currentPiece->deleteLegalMoves();
                 }
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                currentPiece = chessBoard.getPiece(mousePos);
+                currentPiece = chessBoard.getPieceByMouse(mousePos);
                 if (currentPiece == nullptr)
                 {
                     continue;
@@ -71,36 +72,70 @@ int main()
             if (event.type == sf::Event::MouseButtonReleased && currentPiece != nullptr)
             {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                targetPiece = chessBoard.getPiece(mousePos, currentPiece);
+                targetPiece = chessBoard.getPieceByMouse(mousePos, currentPiece);
                 chessBoard.snapPieceToTile(*currentPiece);
-                if (targetPiece == nullptr || targetPiece->color == currentPiece->color)
+                if (targetPiece == nullptr || targetPiece->color == currentPiece->color) // no move
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
-                else if (targetPiece->name == Objects::CELL && currentPiece->isTargetInMoves(targetPiece))
+                else if (targetPiece->name == Objects::CELL && currentPiece->isTargetInMoves(targetPiece)) // cell move
                 {
+                    if (currentPiece->isMoveEnpassant())
+                    {
+                        sf::Vector2i cell{};
+                        cell.x = currentPiece->sprite.getPosition().x;
+                        cell.y = currentPiece->sprite.getPosition().y + (cellHeight * turn);
+                        Objects::Piece* pieceToDelete = chessBoard.getPieceByMouse(cell);
+                        chessBoard.removePiece(pieceToDelete);
+                    }
                     chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
                     currentPiece->deleteLegalMoves();
+                    chessBoard.setAllEnpassantFalse();
+                    if (currentPiece->name == Objects::PAWN)
+                    {
+                        chessBoard.checkEnpassant(currentPiece);
+                    }
                     currentPiece->firstMove = false;
                     turn *= -1;
                 }
-                else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece))
+                else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece)) // attack move
                 {
                     chessBoard.removePiece(targetPiece);
                     chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
                     currentPiece->deleteLegalMoves();
+                    chessBoard.setAllEnpassantFalse();
+                    if (currentPiece->name == Objects::PAWN)
+                    {
+                        chessBoard.checkEnpassant(currentPiece);
+                    }
                     currentPiece->firstMove = false;
                     turn *= -1;
                 }
-                else
+                else // not on board
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
             }
 
+            toBePromoted = chessBoard.checkPromotion();
+
+            if (toBePromoted != nullptr)
+            {
+                std::cout << "promote" << std::endl;
+            }
+
             if (event.type == sf::Event::Closed)
             {
                 window.close();
+            }
+
+            if (event.type == sf::Event::KeyPressed)
+            {
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+                {
+                    chessBoard.startingPosition();
+                    turn = 1;
+                }
             }
         }
         if (currentPiece != nullptr)

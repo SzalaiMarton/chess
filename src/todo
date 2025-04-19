@@ -1,7 +1,5 @@
--turn
--taking pieces
--enpassant
--promotion
+-promotion -> finish promotion window
 -giving check
 -pinning piece
 -game ending check -> stalemate, win, lose
+

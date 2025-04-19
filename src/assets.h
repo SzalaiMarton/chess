@@ -22,9 +22,9 @@ public:
         ObjectTexture(const std::string& name, sf::Texture& texture);
     };
 
-    static ObjectTexture* getObjectTexture(const std::string&);
-    static bool loadImage(const std::string&, const std::string&, sf::Texture&);
-    static void loadDirectoryElements(const std::string&);
+    static ObjectTexture* getObjectTexture(const std::string& name);
+    static bool loadImage(const std::string& path, const std::string& name, sf::Texture& texture);
+    static void loadDirectoryElements(const std::string& path);
     static std::vector<std::string> getDirectoryContents(const std::string &path);
     
 
