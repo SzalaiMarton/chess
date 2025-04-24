@@ -10,6 +10,7 @@ int main()
     Objects::Piece* targetPiece = nullptr;
     Objects::Piece* prevPiece = nullptr;
     Objects::Piece* toBePromoted = nullptr;
+
     float currentPieceLastPosX{}, currentPieceLastPosY{};
     int turn = 1; //1 -> white, -1 -> black
 
@@ -35,21 +36,21 @@ int main()
         {
             if (event.type == sf::Event::MouseButtonPressed)
             {
-                if (currentPiece != nullptr)
-                {
-                    currentPiece->deleteLegalMoves();
-                }
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 currentPiece = chessBoard.getPieceByMouse(mousePos);
                 if (currentPiece == nullptr)
                 {
                     continue;
                 }
+
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
-                    currentPiece->getLegalMoves(chessBoard);
+                    if (currentPiece != prevPiece)
+                    {
+                        currentPiece->getLegalMoves(chessBoard);
+                    }
                     prevPiece = currentPiece;
                     while (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {

@@ -27,11 +27,8 @@ public:
     static void loadDirectoryElements(const std::string& path);
     static std::vector<std::string> getDirectoryContents(const std::string &path);
     
-
     static std::vector<ObjectTexture*> pieceTextures;
     static std::vector<ObjectTexture*> otherTextures;
-
-
 };
 
 #endif

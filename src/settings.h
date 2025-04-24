@@ -16,8 +16,13 @@ const float boardScale = windowWidth / boardTextureWidth;
 const float cellWidth = (windowWidth - boardSide) / 8;
 const float cellHeight = (windowHeight - boardSide) / 8;
 const float pieceScale = cellWidth / pieceTextureWidth;
-const int fps = 60;
-const int noIndex = -1;
+const uint8_t fps = 60;
+const uint8_t noIndex = 255;
+
+const uint8_t firstBlackIndex = 0;
+const uint8_t lastBlackIndex = 15;
+const uint8_t firstWhiteIndex = 48;
+const uint8_t lastWhiteIndex = 63;
 
 extern std::vector<std::string> whitePieceOrder;
 extern std::vector<std::string> blackPieceOrder;

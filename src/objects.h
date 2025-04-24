@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include "assets.h"
 #include "settings.h"
 #include "SFML/Graphics.hpp"
@@ -52,6 +53,19 @@ public:
         bool enpassant;
     };
 
+    struct Vector2fComparator
+    {
+        bool operator()(const sf::Vector2f& a, const sf::Vector2f& b) const {
+            if (a.x < b.x) {
+                return true;
+            }
+            if (a.x > b.x) {
+                return false;
+            }
+            return a.y < b.y;
+        }
+    };
+
     class Piece
     {
     public:
@@ -68,8 +82,8 @@ public:
         Piece(PieceName name, PieceColor color);
         Piece(PieceName name, PieceColor color, const sf::Texture&);
 
-        void getLegalMoves(Objects::Board& board);
-        void checkPawnAttack(Objects::Board& board, int x, int direction); // x = -1 or 1 -> depends on the side
+        void getLegalMoves(Objects::Board& board, bool onlyAttacks = false);
+        void checkPawnAttack(Objects::Board& board, int x, int direction, bool onlyAttack = false); // x = -1 or 1 -> depends on the side
         void deletePiece();
         void deleteLegalMoves();
         void setTexture(const sf::Texture& texture);
@@ -77,6 +91,12 @@ public:
         bool isTargetInMoves(Objects::Piece* target);
         void resetPiece();
         bool isMoveEnpassant();
+        void getKnightMoves(Objects::Board& board);
+
+        void newKingMoveGetter(Objects::Board& board);
+        void getKingMoveNoRestriction(Objects::Board& board);
+        void sortKingMoves(std::set<sf::Vector2f, Objects::Vector2fComparator>& dangerZone);
+        void getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells);
     };
 
     class Board
@@ -101,10 +121,20 @@ public:
     static PieceName convertStringToPieceName(std::string& name);
     static PieceColor convertCharToPieceColor(char color);
     static Piece noPiece;
-    static void getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, int& amount);
-    static void knightMoves(Objects::Piece* piece, Objects::Board& board);
+    static void getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, uint8_t& amount);
     static void getDirectionMultiplier(Objects::Directions direction, int& x, int& y);
-    static bool isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, int direction);
+    static bool isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, Objects::Directions direction, bool onlyAttack = false);
+
+    static Objects::Directions addTwoDirections(Objects::Directions vertical, Objects::Directions horizontal);
+    static bool isVerticalDir(Objects::Directions dir);
+    static bool isHorizontalDir(Objects::Directions dir);
+    static bool isDiagonalDir(Objects::Directions dir);
+
+    static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
+
+    static std::string forDevNameToString(Objects::PieceName name);
+    static char forDevColorToChar(Objects::PieceColor color);
+    static std::string forDevDirToString(Objects::Directions dir);
 };
 
 #endif

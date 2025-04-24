@@ -1,66 +1,91 @@
 #include "objects.h"
 #include "assets.h"
 
-void Objects::Piece::getLegalMoves(Objects::Board& board)
+void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
 {
     if (this->name == Objects::KNIGHT)
     {
-        Objects::knightMoves(this, board);
+        this->getKnightMoves(board);
         return;
     }
+    
     int multiplierX{}, multiplierY{};
     sf::Vector2i cell{};
     Objects::Piece* targetCell{};
     std::vector<Objects::Directions> directions;
-    int amount{};
+    uint8_t amount{};
     Objects::getMoveProperties(this, directions, amount);
-    this->legalMoves.resize(directions.size());
+    this->legalMoves.resize(8);
+
     if (this->name == Objects::PAWN && !this->firstMove)
     {
         amount--;
     }
     if (this->name == Objects::PAWN)
     {
-        this->checkPawnAttack(board, -1, 0); // left
-        this->checkPawnAttack(board, 1, 0); // right
+        this->checkPawnAttack(board, -1, 0, onlyAttacks); // left
+        this->checkPawnAttack(board, 1, 0, onlyAttacks); // right
+        if (onlyAttacks)
+        {
+            return;
+        }
     }
-    for (int direction = 0; direction < directions.size(); direction++)
+
+    for (auto& direction : directions)
     {
         cell.x = (int)this->sprite.getPosition().x;
-        cell.y = (int)this->sprite.getPosition().y; 
+        cell.y = (int)this->sprite.getPosition().y;
         multiplierX = 0;
         multiplierY = 0;
-        Objects::getDirectionMultiplier(directions[direction], multiplierX, multiplierY);
+        Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
         for (int i = 0; i < amount; i++)
         {
             cell.x = cell.x + (cellWidth * multiplierX);
             cell.y = cell.y + (cellHeight * multiplierY);
             targetCell = board.getPieceByMouse(cell);
-            if (!Objects::isTargetCellValid(targetCell, this, direction))
+            if (Objects::isTargetCellValid(targetCell, this, direction, onlyAttacks) == false)
             {
                 break;
             }
         }
     }
+    if (this->name == Objects::KING && !onlyAttacks)
+    {
+        this->newKingMoveGetter(board);
+    }
 }
 
-bool Objects::isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, int direction)
+bool Objects::isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, Objects::Directions direction, bool onlyAttack)
 {
+    //returns true if nothing blocking
+    //returns false if something is blocking
     if (targetCell != nullptr)
     {
-        if (targetCell->name == Objects::CELL)
+        if (targetCell->name == Objects::CELL) // regular move
         {
             piece->createLegalMove(direction, targetCell);
+            return true;
         }
-        else if (piece->name != Objects::PAWN && piece->color != targetCell->color)
+        else if (piece->name != Objects::PAWN && piece->color != targetCell->color) // attack 
         {
             piece->createLegalMove(direction, targetCell);
+            if (onlyAttack && targetCell->name == Objects::KING)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
-        if (targetCell->color != Objects::NONE)
+        else if (piece->color == targetCell->color) // blocking by ally
         {
             return false;
         }
-        return true;
+        else
+        {
+            return false;
+        }
     }
     else
     {
@@ -68,7 +93,257 @@ bool Objects::isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piec
     }
 }
 
-void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction)
+void Objects::Piece::newKingMoveGetter(Objects::Board& board)
+{
+    std::set<sf::Vector2f, Objects::Vector2fComparator> dangerZone;
+	this->getDangerZone(board, dangerZone);
+    this->sortKingMoves(dangerZone);
+}
+
+
+Objects::Directions Objects::addTwoDirections(Objects::Directions vertical, Objects::Directions horizontal)
+{
+    if (vertical == Objects::NORTH)
+    {
+        if (horizontal == Objects::WEST)
+        {
+            return Objects::NORTHWEST;
+        }
+        else if (horizontal == Objects::EAST)
+        {
+            return Objects::NORTHEAST;
+        }
+    }
+    else if (vertical == Objects::SOUTH)
+    {
+        if (horizontal == Objects::WEST)
+        {
+            return Objects::SOUTHWEST;
+        }
+        else if (horizontal == Objects::EAST)
+        {
+            return Objects::SOUTHEAST;
+        }
+    }
+}
+
+bool Objects::isVerticalDir(Objects::Directions dir)
+{
+    if (dir == Objects::NORTH || dir == Objects::SOUTH)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Objects::isHorizontalDir(Objects::Directions dir)
+{
+    if (dir == Objects::EAST || dir == Objects::WEST)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Objects::isDiagonalDir(Objects::Directions dir)
+{
+    if (dir == Objects::NORTHEAST || dir == Objects::NORTHWEST || dir == Objects::SOUTHEAST || dir == Objects::SOUTHWEST)
+    {
+        return true;
+    }
+    return false;
+}
+
+Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
+{
+    if (color == Objects::WHITE)
+    {
+        return Objects::BLACK;
+    }
+    else
+    {
+        return Objects::WHITE;
+    }
+}
+
+void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells)
+{
+	uint8_t firstInd{}, lastInd{};
+    if (this->color == Objects::WHITE)
+    {
+		firstInd = firstBlackIndex;
+		lastInd = lastBlackIndex;
+	}
+	else
+	{
+		firstInd = firstWhiteIndex;
+		lastInd = lastWhiteIndex;
+	}
+    for (uint8_t pieceInd = firstInd; pieceInd < lastInd; pieceInd++)
+    {
+        board.onBoard[pieceInd].getLegalMoves(board, true);
+        for (auto& dir : board.onBoard[pieceInd].legalMoves)
+        {
+            for (auto& move : dir)
+            {
+                cells.insert(move->sprite.getPosition());
+            }
+        }
+        board.onBoard[pieceInd].deleteLegalMoves();
+    }
+}
+
+void Objects::Piece::getKingMoveNoRestriction(Objects::Board& board)
+{
+	int multiplierX{}, multiplierY{};
+	sf::Vector2i cell{};
+	Objects::Piece* targetCell{};
+	std::vector<Directions> directions;
+	uint8_t amount{};
+    Objects::getMoveProperties(this, directions, amount);
+    amount = 1;
+	this->legalMoves.resize(8);
+    for (auto& dir : directions)
+    {
+        cell.x = (int)this->sprite.getPosition().x;
+        cell.y = (int)this->sprite.getPosition().y;
+        multiplierX = 0;
+        multiplierY = 0;
+        Objects::getDirectionMultiplier(dir, multiplierX, multiplierY);
+        for (uint8_t i = 0; i < amount; i++)
+        {
+            cell.x = cell.x + (cellWidth * multiplierX);
+            cell.y = cell.y + (cellHeight * multiplierY);
+            targetCell = board.getPieceByMouse(cell);
+            if (!Objects::isTargetCellValid(targetCell, this, dir))
+            {
+                break;
+            }
+        }
+    }
+}
+
+void Objects::Piece::sortKingMoves(std::set<sf::Vector2f, Objects::Vector2fComparator>& dangerZone)
+{
+    bool found = false;
+    for (auto& danger : dangerZone)
+    {
+        found = false;
+        for (auto& dir : this->legalMoves)
+        {
+            for (uint8_t moveInd = 0; moveInd < dir.size(); moveInd++)
+            {
+				//std::cout << "checking: " << danger.x << "  " << danger.y << "    " << dir[moveInd]->sprite.getPosition().x << "  " << dir[moveInd]->sprite.getPosition().y << std::endl;
+                if (dir[moveInd]->sprite.getPosition().x == danger.x && dir[moveInd]->sprite.getPosition().y == danger.y)
+                {
+					//std::cout << "found: " << dir[moveInd]->sprite.getPosition().x << " " << dir[moveInd]->sprite.getPosition().y << std::endl;
+					dir.erase(dir.begin() + moveInd);
+                    found = true;
+                    break;
+                }
+            }
+            if (found)
+            {
+                break;
+            }
+        }
+    }
+}
+
+std::string Objects::forDevNameToString(Objects::PieceName name)
+{
+    if (name == Objects::KING)
+    {
+        return "KING";
+    }
+    else if (name == Objects::QUEEN)
+    {
+        return "QUEEN";
+    }
+    else if (name == Objects::KNIGHT)
+    {
+        return "KNIGHT";
+    }
+    else if (name == Objects::ROOK)
+    {
+        return "ROOK";
+    }
+    else if (name == Objects::BISHOP)
+    {
+        return "BISHOP";
+
+    }
+    else if (name == Objects::PAWN)
+    {
+        return "PAWN";
+    }
+    else
+    {
+        return "null";
+    }
+}
+
+char Objects::forDevColorToChar(Objects::PieceColor color)
+{
+    if (color == Objects::WHITE)
+    {
+        return 'w';
+    }
+    else if (color == Objects::BLACK)
+    {
+        return 'b';
+    }
+    else if (color == Objects::NONE)
+    {
+        return 'n';
+    }
+    else
+    {
+        return 'q';
+    }
+}
+
+std::string Objects::forDevDirToString(Objects::Directions dir)
+{
+    if (dir == Objects::NORTH)
+    {
+        return "NORTH";
+    }
+    else if (dir == Objects::SOUTH)
+    {
+        return "SOUTH";
+    }
+    else if (dir == Objects::EAST)
+    {
+        return "EAST";
+    }
+    else if (dir == Objects::WEST)
+    {
+        return "WEST";
+    }
+    else if (dir == Objects::SOUTHEAST)
+    {
+        return "SOUTHEAST";
+    }
+    else if (dir == Objects::SOUTHWEST)
+    {
+        return "SOUTHWEST";
+    }
+    else if (dir == Objects::NORTHEAST)
+    {
+        return "NORTHEAST";
+    }
+    else if (dir == Objects::NORTHWEST)
+    {
+        return "NORTHWEST";
+    }
+    else
+    {
+        return "nulldir";
+    }
+}
+
+void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction, bool onlyAttack)
 {
     sf::Vector2i cell;
     int y = 0;
@@ -85,7 +360,11 @@ void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction
     Objects::Piece* targetCell = board.getPieceByMouse(cell);
     if (targetCell != nullptr)
     {
-        if ((targetCell->color != this->color || targetCell->color == Objects::NONE) && this->enpassantRight && x == 1)
+        if (onlyAttack)
+        {
+            this->createLegalMove(direction, targetCell);
+        }
+        else if ((targetCell->color != this->color || targetCell->color == Objects::NONE) && this->enpassantRight && x == 1)
         {
             this->createLegalMove(direction, targetCell, true);
         }
@@ -106,20 +385,20 @@ void Objects::Piece::deleteLegalMoves()
     this->legalMoves.clear();
 }
 
-void Objects::knightMoves(Objects::Piece* piece, Objects::Board& board)
+void Objects::Piece::getKnightMoves(Objects::Board& board)
 {
     std::vector<Directions> directions;
-    int amount{};
+    uint8_t amount{};
     int multiplierX{}, multiplierY{};
     int offsetX{}, offsetY{};
     sf::Vector2i cell{};
     Objects::Piece* targetCell{};
-    Objects::getMoveProperties(piece, directions, amount);
-    piece->legalMoves.resize(directions.size());
+    Objects::getMoveProperties(this, directions, amount);
+    this->legalMoves.resize(directions.size());
     for (auto& direction : directions)
     {
-        cell.x = (int)piece->sprite.getPosition().x;
-        cell.y = (int)piece->sprite.getPosition().y;
+        cell.x = (int)this->sprite.getPosition().x;
+        cell.y = (int)this->sprite.getPosition().y;
         multiplierX = 0; multiplierY = 0;
         offsetX = 0; offsetY = 0;
         Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
@@ -136,8 +415,8 @@ void Objects::knightMoves(Objects::Piece* piece, Objects::Board& board)
         }
         for (int i = 0; i < 2; i++)
         {
-            cell.x = (int)piece->sprite.getPosition().x;
-            cell.y = (int)piece->sprite.getPosition().y; 
+            cell.x = (int)this->sprite.getPosition().x;
+            cell.y = (int)this->sprite.getPosition().y;
             if (i == 1)
             {
                 offsetX *= -1; offsetY *= -1;
@@ -147,7 +426,7 @@ void Objects::knightMoves(Objects::Piece* piece, Objects::Board& board)
             targetCell = board.getPieceByMouse(cell);
             if (board.isTargetOnBoard(targetCell))
             {
-                Objects::isTargetCellValid(targetCell, piece, direction);
+                Objects::isTargetCellValid(targetCell, this, direction);
             }
             else
             {
@@ -243,9 +522,6 @@ void Objects::getDirectionMultiplier(Objects::Directions direction, int& x, int&
         break;
     }
 }
-
-
-
 
 void Objects::Piece::deletePiece()
 {
@@ -347,7 +623,7 @@ Objects::PieceColor Objects::convertCharToPieceColor(char color)
     }
 }
 
-void Objects::getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, int& amount)
+void Objects::getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, uint8_t& amount)
 {
     switch (piece->name)
     {
