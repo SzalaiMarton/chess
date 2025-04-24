@@ -93,7 +93,7 @@ public:
         bool isMoveEnpassant();
         void getKnightMoves(Objects::Board& board);
 
-        void newKingMoveGetter(Objects::Board& board);
+        void kingMoveGetter(Objects::Board& board);
         void getKingMoveNoRestriction(Objects::Board& board);
         void sortKingMoves(std::set<sf::Vector2f, Objects::Vector2fComparator>& dangerZone);
         void getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells);
@@ -116,6 +116,9 @@ public:
         void checkEnpassant(Objects::Piece* currentPiece);
         void startingPosition();
         Objects::Piece* checkPromotion();
+        bool checkForCheck(int turn, std::vector<Objects::Indicator*>& checkLine);
+        void getBlockingPieces(int turn, std::vector<Objects::Indicator*>& checkLine);
+        bool canBlock(Objects::Piece* piece);
     };
 
     static PieceName convertStringToPieceName(std::string& name);
@@ -131,6 +134,8 @@ public:
     static bool isDiagonalDir(Objects::Directions dir);
 
     static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
+
+    static void addElementsToCheckLine(std::vector<Objects::Indicator*>& vector, std::vector<Objects::Indicator*>& checkLine);
 
     static std::string forDevNameToString(Objects::PieceName name);
     static char forDevColorToChar(Objects::PieceColor color);

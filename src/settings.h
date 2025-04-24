@@ -23,6 +23,8 @@ const uint8_t firstBlackIndex = 0;
 const uint8_t lastBlackIndex = 15;
 const uint8_t firstWhiteIndex = 48;
 const uint8_t lastWhiteIndex = 63;
+const uint8_t blackKingIndex = 3;
+const uint8_t whiteKingIndex = 60;
 
 extern std::vector<std::string> whitePieceOrder;
 extern std::vector<std::string> blackPieceOrder;

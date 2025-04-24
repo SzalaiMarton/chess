@@ -51,7 +51,7 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
     }
     if (this->name == Objects::KING && !onlyAttacks)
     {
-        this->newKingMoveGetter(board);
+        this->kingMoveGetter(board);
     }
 }
 
@@ -93,7 +93,7 @@ bool Objects::isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piec
     }
 }
 
-void Objects::Piece::newKingMoveGetter(Objects::Board& board)
+void Objects::Piece::kingMoveGetter(Objects::Board& board)
 {
     std::set<sf::Vector2f, Objects::Vector2fComparator> dangerZone;
 	this->getDangerZone(board, dangerZone);
@@ -163,6 +163,14 @@ Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
     else
     {
         return Objects::WHITE;
+    }
+}
+
+void Objects::addElementsToCheckLine(std::vector<Objects::Indicator*>& vector, std::vector<Objects::Indicator*>& checkLine)
+{
+    for (auto& element : vector)
+    {
+        checkLine.push_back(element);
     }
 }
 
@@ -812,4 +820,117 @@ Objects::Piece* Objects::Board::checkPromotion()
         }
     }
     return nullptr;
+}
+
+bool Objects::Board::checkForCheck(int turn, std::vector<Objects::Indicator*>& checkLine)
+{
+	uint8_t dirIndex = 0;
+    uint8_t firstInd{}, lastInd{}, kingInd{};
+    int checkGivers = 0;
+    std::vector<Objects::Indicator*> tempVectorForCheckLine{};
+    if (turn == 1)
+    {
+        firstInd = firstBlackIndex;
+        lastInd = lastBlackIndex;
+        kingInd = whiteKingIndex;
+    }
+    else
+    {
+        firstInd = firstWhiteIndex;
+        lastInd = lastWhiteIndex;
+        kingInd = blackKingIndex;
+    }
+	sf::Vector2f kingPos = this->onBoard[kingInd].sprite.getPosition();
+    for (uint8_t i = firstInd; i < lastInd; i++)
+    {
+        if (this->onBoard[i].name == Objects::KING)
+        {
+            continue;
+        }
+		this->onBoard[i].getLegalMoves(*this, true);
+		for (auto& dir : this->onBoard[i].legalMoves)
+		{
+			for (auto& move : dir)
+			{
+                tempVectorForCheckLine.push_back(move);
+                if (move->sprite.getPosition() == kingPos)
+				{
+                    Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
+                    Objects::Indicator* legalMove = new Objects::Indicator();
+                    legalMove->sprite = this->onBoard[i].sprite;
+                    legalMove->sprite.setTexture(indicatorTexture->texture);
+                    tempVectorForCheckLine.push_back(legalMove);
+                    Objects::addElementsToCheckLine(tempVectorForCheckLine, checkLine);
+                    checkGivers++;
+                    tempVectorForCheckLine.clear();
+				}
+            }
+            tempVectorForCheckLine.clear();
+            dirIndex++;
+		}
+        this->onBoard[i].deleteLegalMoves();
+        dirIndex = 0;
+    }
+
+	if (checkGivers > 0)
+	{
+		return true;
+	}
+    else
+    {
+        return false;
+    }
+}
+
+void Objects::Board::getBlockingPieces(int turn, std::vector<Objects::Indicator*>& checkLine)
+{
+	uint8_t firstInd{}, lastInd{};
+    uint8_t dirIndex = 0;
+    std::vector<std::vector<Objects::Indicator*>> tempLegalMoves{};
+    if (turn == 1)
+    {
+        firstInd = firstWhiteIndex;
+        lastInd = lastWhiteIndex;
+    }
+    else
+    {
+        firstInd = firstBlackIndex;
+        lastInd = lastBlackIndex;
+    }
+	for (uint8_t i = firstInd; i < lastInd; i++)
+	{
+        tempLegalMoves.resize(8);
+		if (this->onBoard[i].name == Objects::KING)
+		{
+			continue;
+		}
+		this->onBoard[i].getLegalMoves(*this);
+        for (auto& dir : this->onBoard[i].legalMoves)
+		{
+            for (auto& move : dir)
+			{
+				for (auto& check : checkLine)
+				{
+                    if (move->sprite.getPosition() == check->sprite.getPosition())
+					{
+                        tempLegalMoves[dirIndex].push_back(check);
+					}
+				}
+			}
+            dirIndex++;
+		}
+        dirIndex = 0;
+		this->onBoard[i].deleteLegalMoves();
+        this->onBoard[i].legalMoves = tempLegalMoves;
+        tempLegalMoves.clear();
+	}
+}
+
+bool Objects::Board::canBlock(Objects::Piece* piece)
+{
+    if (piece->legalMoves.size() != 0)
+    {
+        return true;
+    }
+    return false;
 }

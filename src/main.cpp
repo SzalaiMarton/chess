@@ -11,8 +11,13 @@ int main()
     Objects::Piece* prevPiece = nullptr;
     Objects::Piece* toBePromoted = nullptr;
 
+	std::vector<Objects::Indicator*> checkLine{};
+
     float currentPieceLastPosX{}, currentPieceLastPosY{};
     int turn = 1; //1 -> white, -1 -> black
+    bool check = false;
+	bool alreadyCheckForCheck = false;
+    bool alreadyCheckForPromotion = false;
 
     Assets::loadDirectoryElements(pathToOtherTextures);
     Assets::loadDirectoryElements(pathToPieceTextures);
@@ -47,7 +52,11 @@ int main()
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
-                    if (currentPiece != prevPiece)
+                    if (check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING)
+                    {
+                        continue;
+                    }
+                    if (currentPiece != prevPiece && currentPiece->legalMoves.size() == 0)
                     {
                         currentPiece->getLegalMoves(chessBoard);
                     }
@@ -79,7 +88,7 @@ int main()
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
-                else if (targetPiece->name == Objects::CELL && currentPiece->isTargetInMoves(targetPiece)) // cell move
+                else if (targetPiece->name == Objects::CELL && currentPiece->isTargetInMoves(targetPiece)) // regular move
                 {
                     if (currentPiece->isMoveEnpassant())
                     {
@@ -98,6 +107,8 @@ int main()
                     }
                     currentPiece->firstMove = false;
                     turn *= -1;
+                    alreadyCheckForCheck = false;
+                    alreadyCheckForPromotion = false;
                 }
                 else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece)) // attack move
                 {
@@ -111,6 +122,8 @@ int main()
                     }
                     currentPiece->firstMove = false;
                     turn *= -1;
+                    alreadyCheckForCheck = false;
+                    alreadyCheckForPromotion = false;
                 }
                 else // not on board
                 {
@@ -118,13 +131,26 @@ int main()
                 }
             }
 
-            toBePromoted = chessBoard.checkPromotion();
-
-            if (toBePromoted != nullptr)
+            if (!alreadyCheckForCheck)
             {
-                std::cout << "promote" << std::endl;
+                check = chessBoard.checkForCheck(turn, checkLine);
+                if (check && !alreadyCheckForCheck)
+                {
+                    chessBoard.getBlockingPieces(turn, checkLine);
+                }
+                alreadyCheckForCheck = true;
             }
-
+            
+            if (!alreadyCheckForPromotion)
+            {
+                toBePromoted = chessBoard.checkPromotion();
+                alreadyCheckForPromotion = true;
+                if (toBePromoted != nullptr)
+                {
+                    std::cout << "promote" << std::endl;
+                }
+            }
+            
             if (event.type == sf::Event::Closed)
             {
                 window.close();

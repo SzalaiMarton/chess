@@ -1,4 +1,3 @@
--promotion -> finish promotion window
--giving check
--pinning piece
--game ending check -> stalemate, win, lose
+- pinning piece
+- promotion -> finish promotion window
+- game ending check -> stalemate, win, lose
