@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <set>
 #include "assets.h"
 #include "settings.h"
@@ -55,7 +56,8 @@ public:
 
     struct Vector2fComparator
     {
-        bool operator()(const sf::Vector2f& a, const sf::Vector2f& b) const {
+        bool operator()(const sf::Vector2f& a, const sf::Vector2f& b) const 
+        {
             if (a.x < b.x) {
                 return true;
             }
@@ -66,6 +68,7 @@ public:
         }
     };
 
+   
     class Piece
     {
     public:
@@ -116,9 +119,11 @@ public:
         void checkEnpassant(Objects::Piece* currentPiece);
         void startingPosition();
         Objects::Piece* checkPromotion();
-        bool checkForCheck(int turn, std::vector<Objects::Indicator*>& checkLine);
+        bool checkForCheck(Objects::Piece* piece, Objects::Piece* king, std::vector<Objects::Indicator*>& checkLine);
         void getBlockingPieces(int turn, std::vector<Objects::Indicator*>& checkLine);
         bool canBlock(Objects::Piece* piece);
+        Objects::Piece* getKingByColor(Objects::PieceColor color);
+        void deleteAllMoves();
     };
 
     static PieceName convertStringToPieceName(std::string& name);
@@ -134,8 +139,7 @@ public:
     static bool isDiagonalDir(Objects::Directions dir);
 
     static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
-
-    static void addElementsToCheckLine(std::vector<Objects::Indicator*>& vector, std::vector<Objects::Indicator*>& checkLine);
+    static Objects::Indicator* makeIndicator(sf::Sprite sprite, bool enpassant = false);
 
     static std::string forDevNameToString(Objects::PieceName name);
     static char forDevColorToChar(Objects::PieceColor color);

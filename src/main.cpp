@@ -16,7 +16,7 @@ int main()
     float currentPieceLastPosX{}, currentPieceLastPosY{};
     int turn = 1; //1 -> white, -1 -> black
     bool check = false;
-	bool alreadyCheckForCheck = false;
+	bool alreadyCheckForBlock = false;
     bool alreadyCheckForPromotion = false;
 
     Assets::loadDirectoryElements(pathToOtherTextures);
@@ -41,6 +41,13 @@ int main()
         {
             if (event.type == sf::Event::MouseButtonPressed)
             {
+                
+                if (check && !alreadyCheckForBlock)
+                {
+                    chessBoard.getBlockingPieces(turn, checkLine);
+                    alreadyCheckForBlock = true;
+                }
+
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 currentPiece = chessBoard.getPieceByMouse(mousePos);
                 if (currentPiece == nullptr)
@@ -98,47 +105,27 @@ int main()
                         Objects::Piece* pieceToDelete = chessBoard.getPieceByMouse(cell);
                         chessBoard.removePiece(pieceToDelete);
                     }
-                    chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                    currentPiece->deleteLegalMoves();
-                    chessBoard.setAllEnpassantFalse();
+                    Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
                     if (currentPiece->name == Objects::PAWN)
                     {
                         chessBoard.checkEnpassant(currentPiece);
                     }
-                    currentPiece->firstMove = false;
-                    turn *= -1;
-                    alreadyCheckForCheck = false;
-                    alreadyCheckForPromotion = false;
+                    Functions::afterMove(currentPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion);
                 }
                 else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece)) // attack move
                 {
                     chessBoard.removePiece(targetPiece);
-                    chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                    currentPiece->deleteLegalMoves();
-                    chessBoard.setAllEnpassantFalse();
+                    Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
                     if (currentPiece->name == Objects::PAWN)
                     {
                         chessBoard.checkEnpassant(currentPiece);
                     }
-                    currentPiece->firstMove = false;
-                    turn *= -1;
-                    alreadyCheckForCheck = false;
-                    alreadyCheckForPromotion = false;
+                    Functions::afterMove(currentPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion);
                 }
                 else // not on board
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
-            }
-
-            if (!alreadyCheckForCheck)
-            {
-                check = chessBoard.checkForCheck(turn, checkLine);
-                if (check && !alreadyCheckForCheck)
-                {
-                    chessBoard.getBlockingPieces(turn, checkLine);
-                }
-                alreadyCheckForCheck = true;
             }
             
             if (!alreadyCheckForPromotion)

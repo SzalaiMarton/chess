@@ -166,12 +166,18 @@ Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
     }
 }
 
-void Objects::addElementsToCheckLine(std::vector<Objects::Indicator*>& vector, std::vector<Objects::Indicator*>& checkLine)
+Objects::Indicator* Objects::makeIndicator(sf::Sprite sprite, bool enpassant)
 {
-    for (auto& element : vector)
+    Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
+    if (indicatorTexture == nullptr)
     {
-        checkLine.push_back(element);
+        return nullptr;
     }
+    Objects::Indicator* legalMove = new Objects::Indicator();
+    legalMove->sprite = sprite;
+    legalMove->sprite.setTexture(indicatorTexture->texture);
+    legalMove->enpassant = enpassant;
+    return legalMove;
 }
 
 void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells)
@@ -241,10 +247,8 @@ void Objects::Piece::sortKingMoves(std::set<sf::Vector2f, Objects::Vector2fCompa
         {
             for (uint8_t moveInd = 0; moveInd < dir.size(); moveInd++)
             {
-				//std::cout << "checking: " << danger.x << "  " << danger.y << "    " << dir[moveInd]->sprite.getPosition().x << "  " << dir[moveInd]->sprite.getPosition().y << std::endl;
                 if (dir[moveInd]->sprite.getPosition().x == danger.x && dir[moveInd]->sprite.getPosition().y == danger.y)
                 {
-					//std::cout << "found: " << dir[moveInd]->sprite.getPosition().x << " " << dir[moveInd]->sprite.getPosition().y << std::endl;
 					dir.erase(dir.begin() + moveInd);
                     found = true;
                     break;
@@ -446,16 +450,7 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
 
 void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant)
 {
-    Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
-    if (indicatorTexture == nullptr)
-    {
-        return;
-    }
-    Objects::Indicator* legalMove = new Objects::Indicator();
-    legalMove->sprite = targetCell->sprite;
-    legalMove->sprite.setTexture(indicatorTexture->texture);
-    legalMove->enpassant = enpassant;
-    this->legalMoves[direction].emplace_back(legalMove);
+    this->legalMoves[direction].emplace_back(Objects::makeIndicator(targetCell->sprite, enpassant));
 }
 
 bool Objects::Piece::isTargetInMoves(Objects::Piece* target)
@@ -822,64 +817,25 @@ Objects::Piece* Objects::Board::checkPromotion()
     return nullptr;
 }
 
-bool Objects::Board::checkForCheck(int turn, std::vector<Objects::Indicator*>& checkLine)
+bool Objects::Board::checkForCheck(Objects::Piece* piece, Objects::Piece* king, std::vector<Objects::Indicator*>& checkLine)
 {
-	uint8_t dirIndex = 0;
-    uint8_t firstInd{}, lastInd{}, kingInd{};
-    int checkGivers = 0;
-    std::vector<Objects::Indicator*> tempVectorForCheckLine{};
-    if (turn == 1)
+    std::vector<Objects::Indicator*> moveCollector;
+    for (auto& dir : piece->legalMoves)
     {
-        firstInd = firstBlackIndex;
-        lastInd = lastBlackIndex;
-        kingInd = whiteKingIndex;
-    }
-    else
-    {
-        firstInd = firstWhiteIndex;
-        lastInd = lastWhiteIndex;
-        kingInd = blackKingIndex;
-    }
-	sf::Vector2f kingPos = this->onBoard[kingInd].sprite.getPosition();
-    for (uint8_t i = firstInd; i < lastInd; i++)
-    {
-        if (this->onBoard[i].name == Objects::KING)
+        for (int moveInd = 0; moveInd < dir.size(); moveInd++)
         {
-            continue;
-        }
-		this->onBoard[i].getLegalMoves(*this, true);
-		for (auto& dir : this->onBoard[i].legalMoves)
-		{
-			for (auto& move : dir)
-			{
-                tempVectorForCheckLine.push_back(move);
-                if (move->sprite.getPosition() == kingPos)
-				{
-                    Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
-                    Objects::Indicator* legalMove = new Objects::Indicator();
-                    legalMove->sprite = this->onBoard[i].sprite;
-                    legalMove->sprite.setTexture(indicatorTexture->texture);
-                    tempVectorForCheckLine.push_back(legalMove);
-                    Objects::addElementsToCheckLine(tempVectorForCheckLine, checkLine);
-                    checkGivers++;
-                    tempVectorForCheckLine.clear();
-				}
+            if (king->sprite.getPosition() == dir[moveInd]->sprite.getPosition())
+            {
+                moveCollector.push_back(Objects::makeIndicator(piece->sprite));
+                checkLine.insert(checkLine.begin(), moveCollector.begin(), moveCollector.end());
+                std::cout << checkLine.size() << std::endl;
+                return true;
             }
-            tempVectorForCheckLine.clear();
-            dirIndex++;
-		}
-        this->onBoard[i].deleteLegalMoves();
-        dirIndex = 0;
+            moveCollector.push_back(dir[moveInd]);
+        }
+        moveCollector.clear();
     }
-
-	if (checkGivers > 0)
-	{
-		return true;
-	}
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 void Objects::Board::getBlockingPieces(int turn, std::vector<Objects::Indicator*>& checkLine)
@@ -933,4 +889,24 @@ bool Objects::Board::canBlock(Objects::Piece* piece)
         return true;
     }
     return false;
+}
+
+Objects::Piece* Objects::Board::getKingByColor(Objects::PieceColor color)
+{
+    if (color == Objects::BLACK)
+    {
+        return &this->onBoard[blackKingIndex];
+    }
+    else if (color == Objects::WHITE)
+    {
+        return &this->onBoard[whiteKingIndex];
+    }
+}
+
+void Objects::Board::deleteAllMoves()
+{
+    for (auto& piece : this->onBoard)
+    {
+        piece.deleteLegalMoves();
+    }
 }

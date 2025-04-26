@@ -138,3 +138,26 @@ void Functions::choosePieceForPromotion(Objects::Piece* piecePromoted) // make a
 {
 
 }
+
+void Functions::afterMove(Objects::Piece* currentPiece, int& turn, bool& check, Objects::Board& chessBoard, std::vector<Objects::Indicator*>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion)
+{
+	check = false;
+	currentPiece->firstMove = false;
+	turn *= -1;
+	if (currentPiece->name != Objects::KING)
+	{
+		currentPiece->getLegalMoves(chessBoard, true);
+		check = chessBoard.checkForCheck(currentPiece, chessBoard.getKingByColor(Objects::getOpposingColor(currentPiece->color)), checkLine);
+		currentPiece->deleteLegalMoves();
+	}
+	chessBoard.deleteAllMoves();
+	alreadyCheckForBlock = false;
+	alreadyCheckForPromotion = false;
+}
+
+void Functions::changePlace(Objects::Board& chessBoard, Objects::Piece* currentPiece, Objects::Piece* targetPiece, float currentPieceLastPosX, float currentPieceLastPosY)
+{
+	chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
+	chessBoard.setAllEnpassantFalse();
+	currentPiece->deleteLegalMoves();
+}
