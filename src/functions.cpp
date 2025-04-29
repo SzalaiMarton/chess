@@ -150,6 +150,10 @@ void Functions::afterMove(Objects::Piece* currentPiece, int& turn, bool& check, 
 		check = chessBoard.checkForCheck(currentPiece, chessBoard.getKingByColor(Objects::getOpposingColor(currentPiece->color)), checkLine);
 		currentPiece->deleteLegalMoves();
 	}
+	if (check)
+	{
+		currentPiece->isPinned = true;
+	}
 	chessBoard.deleteAllMoves();
 	alreadyCheckForBlock = false;
 	alreadyCheckForPromotion = false;

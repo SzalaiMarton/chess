@@ -15,7 +15,7 @@ public:
     static void splitTextureName(std::string& initname, char& recolor, std::string& rename);
     static bool isNameInRange(Objects::PieceName& name);
     static bool isPieceMatchTurn(Objects::Piece* piece, int turn);
-    static void choosePieceForPromotion(Objects::Piece* piecePromoted);
+    static void choosePieceForPromotion(Objects::Piece* piecePromoted); //---------------------
     static void afterMove(Objects::Piece* currentPiece, int& turn, bool& check, Objects::Board& chessBoard, std::vector<Objects::Indicator*>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion);
     static void changePlace(Objects::Board& chessBoard, Objects::Piece* currentPiece, Objects::Piece* targetPiece, float currentPieceLastPosX, float currentPieceLastPosY);
 

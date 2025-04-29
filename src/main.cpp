@@ -99,11 +99,7 @@ int main()
                 {
                     if (currentPiece->isMoveEnpassant())
                     {
-                        sf::Vector2i cell{};
-                        cell.x = currentPiece->sprite.getPosition().x;
-                        cell.y = currentPiece->sprite.getPosition().y + (cellHeight * turn);
-                        Objects::Piece* pieceToDelete = chessBoard.getPieceByMouse(cell);
-                        chessBoard.removePiece(pieceToDelete);
+                        chessBoard.removeEnpassantPiece(currentPiece->sprite.getPosition(), turn);
                     }
                     Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
                     if (currentPiece->name == Objects::PAWN)

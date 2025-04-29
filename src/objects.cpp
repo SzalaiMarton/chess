@@ -55,6 +55,44 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
     }
 }
 
+void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
+{
+    // used to get pinned piece
+    // only used for rook, bishop, queen
+    // only restriction is: ally is blocking since those cannot be pinned by ally
+
+    int multiplierX{}, multiplierY{};
+    sf::Vector2i cell{};
+    Objects::Piece* targetCell{};
+    std::vector<Objects::Directions> directions;
+    uint8_t amount{};
+    Objects::getMoveProperties(this, directions, amount);
+    this->legalMoves.resize(8);
+
+    for (auto& direction : directions)
+    {
+        cell.x = (int)this->sprite.getPosition().x;
+        cell.y = (int)this->sprite.getPosition().y;
+        multiplierX = 0;
+        multiplierY = 0;
+        Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
+        for (int i = 0; i < amount; i++)
+        {
+            cell.x = cell.x + (cellWidth * multiplierX);
+            cell.y = cell.y + (cellHeight * multiplierY);
+            targetCell = board.getPieceByMouse(cell);
+            if (targetCell->color == this->color)
+            {
+                return;
+            }
+            else
+            {
+                this->createLegalMove(direction, targetCell);
+            }
+        }
+    }
+}
+
 bool Objects::isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, Objects::Directions direction, bool onlyAttack)
 {
     //returns true if nothing blocking
@@ -166,7 +204,7 @@ Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
     }
 }
 
-Objects::Indicator* Objects::makeIndicator(sf::Sprite sprite, bool enpassant)
+Objects::Indicator* Objects::makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant)
 {
     Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
     if (indicatorTexture == nullptr)
@@ -174,6 +212,7 @@ Objects::Indicator* Objects::makeIndicator(sf::Sprite sprite, bool enpassant)
         return nullptr;
     }
     Objects::Indicator* legalMove = new Objects::Indicator();
+    legalMove->targetName = targetName;
     legalMove->sprite = sprite;
     legalMove->sprite.setTexture(indicatorTexture->texture);
     legalMove->enpassant = enpassant;
@@ -448,9 +487,36 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
     }
 }
 
+bool Objects::Piece::isPinning(Objects::Board& board)
+{
+    if (this->name == Objects::KING || this->name == Objects::PAWN || this->name == Objects::KNIGHT)
+    {
+        return false;
+    }
+    else
+    {
+        this->getLegalMovesNoRestrictions(board);
+        for (auto& dir : this->legalMoves)
+        {
+            for (auto& move : dir)
+            {
+                if (move->targetName != Objects::CELL && move->targetName != Objects::KING)
+                {
+                    board.getPieceByMouse(move->sprite.getPosition());
+                }
+
+                if (move->targetName == Objects::KING)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+}
+
 void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant)
 {
-    this->legalMoves[direction].emplace_back(Objects::makeIndicator(targetCell->sprite, enpassant));
+    this->legalMoves[direction].emplace_back(Objects::makeIndicator(targetCell->sprite, targetCell->name, enpassant));
 }
 
 bool Objects::Piece::isTargetInMoves(Objects::Piece* target)
@@ -685,6 +751,7 @@ void Objects::Board::snapPieceToTile(Objects::Piece& piece, float x, float y)
 {
     //get the piece pos and snap it to the closest tile
     //to get the closest tile: get the distance between piece and current tile the compare that with a range and see if its in it
+    
     if (x != -1 && y != -1)
     {
         piece.sprite.setPosition(x, y);
@@ -909,4 +976,13 @@ void Objects::Board::deleteAllMoves()
     {
         piece.deleteLegalMoves();
     }
+}
+
+void Objects::Board::removeEnpassantPiece(sf::Vector2f pos, int turn)
+{
+    sf::Vector2i cell{};
+    cell.x = pos.x;
+    cell.y = pos.y + (cellHeight * turn);
+    Objects::Piece* pieceToDelete = this->getPieceByMouse(cell);
+    this->removePiece(pieceToDelete);
 }

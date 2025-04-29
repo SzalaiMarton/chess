@@ -51,6 +51,7 @@ public:
     struct Indicator
     {
         sf::Sprite sprite;
+        Objects::PieceName targetName;
         bool enpassant;
     };
 
@@ -86,6 +87,7 @@ public:
         Piece(PieceName name, PieceColor color, const sf::Texture&);
 
         void getLegalMoves(Objects::Board& board, bool onlyAttacks = false);
+        void getLegalMovesNoRestrictions(Objects::Board& board);
         void checkPawnAttack(Objects::Board& board, int x, int direction, bool onlyAttack = false); // x = -1 or 1 -> depends on the side
         void deletePiece();
         void deleteLegalMoves();
@@ -95,6 +97,7 @@ public:
         void resetPiece();
         bool isMoveEnpassant();
         void getKnightMoves(Objects::Board& board);
+        bool isPinning(Objects::Board& board);
 
         void kingMoveGetter(Objects::Board& board);
         void getKingMoveNoRestriction(Objects::Board& board);
@@ -124,6 +127,7 @@ public:
         bool canBlock(Objects::Piece* piece);
         Objects::Piece* getKingByColor(Objects::PieceColor color);
         void deleteAllMoves();
+        void removeEnpassantPiece(sf::Vector2f pos, int turn);
     };
 
     static PieceName convertStringToPieceName(std::string& name);
@@ -139,7 +143,7 @@ public:
     static bool isDiagonalDir(Objects::Directions dir);
 
     static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
-    static Objects::Indicator* makeIndicator(sf::Sprite sprite, bool enpassant = false);
+    static Objects::Indicator* makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant = false);
 
     static std::string forDevNameToString(Objects::PieceName name);
     static char forDevColorToChar(Objects::PieceColor color);
