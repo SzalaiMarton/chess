@@ -139,8 +139,14 @@ void Functions::choosePieceForPromotion(Objects::Piece* piecePromoted) // make a
 
 }
 
-void Functions::afterMove(Objects::Piece* currentPiece, int& turn, bool& check, Objects::Board& chessBoard, std::vector<Objects::Indicator*>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion)
+void Functions::afterMove(Objects::Piece* currentPiece, Objects::Piece*& prevRoundPiece, int& turn, bool& check, Objects::Board& chessBoard, std::vector<Objects::Indicator*>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion, std::vector<Objects::Piece*>& pinnedPieces)
 {
+	if (check && prevRoundPiece != nullptr)
+	{
+		currentPiece->isPinned = true;
+		prevRoundPiece->pinnedPiece = currentPiece;
+		pinnedPieces.emplace_back(currentPiece);
+	}
 	check = false;
 	currentPiece->firstMove = false;
 	turn *= -1;
@@ -150,11 +156,9 @@ void Functions::afterMove(Objects::Piece* currentPiece, int& turn, bool& check, 
 		check = chessBoard.checkForCheck(currentPiece, chessBoard.getKingByColor(Objects::getOpposingColor(currentPiece->color)), checkLine);
 		currentPiece->deleteLegalMoves();
 	}
-	if (check)
-	{
-		currentPiece->isPinned = true;
-	}
 	chessBoard.deleteAllMoves();
+	currentPiece->getPinnedPieces(pinnedPieces, chessBoard);
+	prevRoundPiece = currentPiece;
 	alreadyCheckForBlock = false;
 	alreadyCheckForPromotion = false;
 }

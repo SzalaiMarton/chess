@@ -9,8 +9,10 @@ int main()
     Objects::Piece* currentPiece = nullptr;
     Objects::Piece* targetPiece = nullptr;
     Objects::Piece* prevPiece = nullptr;
+    Objects::Piece* prevRoundPiece = nullptr;
     Objects::Piece* toBePromoted = nullptr;
 
+    std::vector<Objects::Piece*> pinnedPieces{};
 	std::vector<Objects::Indicator*> checkLine{};
 
     float currentPieceLastPosX{}, currentPieceLastPosY{};
@@ -50,6 +52,7 @@ int main()
 
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                 currentPiece = chessBoard.getPieceByMouse(mousePos);
+
                 if (currentPiece == nullptr)
                 {
                     continue;
@@ -57,9 +60,12 @@ int main()
 
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
+
+                std::cout << "current: " << currentPiece << "\n";
+
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
-                    if (check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING)
+                    if ((check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING) || currentPiece->isPinned)
                     {
                         continue;
                     }
@@ -67,16 +73,21 @@ int main()
                     {
                         currentPiece->getLegalMoves(chessBoard);
                     }
+                    
                     prevPiece = currentPiece;
+
                     while (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
                         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+
                         currentPiece->sprite.setPosition((float)mousePos.x, (float)mousePos.y);
+
                         if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                         {
                             chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                             break;
                         }
+
                         Functions::refreshFrame(window, chessBoard, currentPiece);
                     }
                 }
@@ -89,8 +100,11 @@ int main()
             if (event.type == sf::Event::MouseButtonReleased && currentPiece != nullptr)
             {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+
                 targetPiece = chessBoard.getPieceByMouse(mousePos, currentPiece);
+                
                 chessBoard.snapPieceToTile(*currentPiece);
+                
                 if (targetPiece == nullptr || targetPiece->color == currentPiece->color) // no move
                 {
                     chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
@@ -101,22 +115,28 @@ int main()
                     {
                         chessBoard.removeEnpassantPiece(currentPiece->sprite.getPosition(), turn);
                     }
+                
                     Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
+                    
                     if (currentPiece->name == Objects::PAWN)
                     {
                         chessBoard.checkEnpassant(currentPiece);
                     }
-                    Functions::afterMove(currentPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion);
+                    
+                    Functions::afterMove(currentPiece, prevRoundPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion, pinnedPieces);
                 }
                 else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece)) // attack move
                 {
                     chessBoard.removePiece(targetPiece);
+                    
                     Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
+                    
                     if (currentPiece->name == Objects::PAWN)
                     {
                         chessBoard.checkEnpassant(currentPiece);
                     }
-                    Functions::afterMove(currentPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion);
+                    
+                    Functions::afterMove(currentPiece, prevRoundPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion, pinnedPieces);
                 }
                 else // not on board
                 {

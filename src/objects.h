@@ -81,6 +81,7 @@ public:
         PieceName name;
         sf::Sprite sprite;
         std::vector<std::vector<Indicator*>> legalMoves;
+        Piece* pinnedPiece;
 
         Piece();
         Piece(PieceName name, PieceColor color);
@@ -97,12 +98,13 @@ public:
         void resetPiece();
         bool isMoveEnpassant();
         void getKnightMoves(Objects::Board& board);
-        bool isPinning(Objects::Board& board);
 
         void kingMoveGetter(Objects::Board& board);
         void getKingMoveNoRestriction(Objects::Board& board);
         void sortKingMoves(std::set<sf::Vector2f, Objects::Vector2fComparator>& dangerZone);
         void getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells);
+        void getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces, Objects::Board& board);
+        void revaluePinningPieces(std::vector<Objects::Piece*>& pinnedPieces);
     };
 
     class Board

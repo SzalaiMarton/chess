@@ -81,7 +81,7 @@ void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
             cell.x = cell.x + (cellWidth * multiplierX);
             cell.y = cell.y + (cellHeight * multiplierY);
             targetCell = board.getPieceByMouse(cell);
-            if (targetCell->color == this->color)
+            if (targetCell == nullptr || targetCell->color == this->color)
             {
                 return;
             }
@@ -243,6 +243,61 @@ void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f,
             }
         }
         board.onBoard[pieceInd].deleteLegalMoves();
+    }
+}
+
+void Objects::Piece::getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces, Objects::Board& board)
+{
+    // gets current piece's moves without enemy blocking its line, if an enemy's piece and king in the same line the piece gets added to pinnedPieces
+    // else nothing happens
+
+    if (this->name == Objects::PAWN || this->name == Objects::KNIGHT || this->name == Objects::KING)
+    {
+        return;
+    }
+
+    this->revaluePinningPieces(pinnedPieces);
+    std::vector<Objects::Piece*> inLinePieces;
+    this->getLegalMovesNoRestrictions(board);
+    for (auto& dir : this->legalMoves)
+    {
+        for (auto& move : dir)
+        {
+            if (move->targetName != Objects::CELL && move->targetName != Objects::KING)
+            {
+                inLinePieces.emplace_back(board.getPieceByMouse(*new sf::Vector2i(move->sprite.getPosition().x, move->sprite.getPosition().y)));
+                if (inLinePieces.size() > 1)
+                {
+                    break;
+                }
+            }
+            else if (move->targetName == Objects::KING)
+            {
+                if (inLinePieces.size() == 1)
+                {
+                    inLinePieces[0]->isPinned = true;
+                    pinnedPieces.emplace_back(inLinePieces[0]);
+                    this->pinnedPiece = inLinePieces[0];
+                    break;
+                }
+            }
+        }
+        inLinePieces.clear();
+    }
+    this->deleteLegalMoves();
+}
+
+void Objects::Piece::revaluePinningPieces(std::vector<Objects::Piece*>& pinnedPieces)
+{
+    for (int i = 0; i < pinnedPieces.size(); i++)
+    {
+        if (pinnedPieces[i] == this->pinnedPiece)
+        {
+            pinnedPieces.erase(pinnedPieces.begin()+i);
+            pinnedPieces[i]->isPinned = false;
+            this->pinnedPiece = nullptr;
+            return;
+        }
     }
 }
 
@@ -487,33 +542,6 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
     }
 }
 
-bool Objects::Piece::isPinning(Objects::Board& board)
-{
-    if (this->name == Objects::KING || this->name == Objects::PAWN || this->name == Objects::KNIGHT)
-    {
-        return false;
-    }
-    else
-    {
-        this->getLegalMovesNoRestrictions(board);
-        for (auto& dir : this->legalMoves)
-        {
-            for (auto& move : dir)
-            {
-                if (move->targetName != Objects::CELL && move->targetName != Objects::KING)
-                {
-                    board.getPieceByMouse(move->sprite.getPosition());
-                }
-
-                if (move->targetName == Objects::KING)
-                {
-                    return true;
-                }
-            }
-        }
-    }
-}
-
 void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant)
 {
     this->legalMoves[direction].emplace_back(Objects::makeIndicator(targetCell->sprite, targetCell->name, enpassant));
@@ -540,6 +568,7 @@ void Objects::Piece::resetPiece()
     this->enpassantRight = false;
     this->firstMove = true;
     this->isPinned = false;
+    this->pinnedPiece = nullptr;
     this->legalMoves.clear();
 }
 
@@ -893,9 +922,8 @@ bool Objects::Board::checkForCheck(Objects::Piece* piece, Objects::Piece* king, 
         {
             if (king->sprite.getPosition() == dir[moveInd]->sprite.getPosition())
             {
-                moveCollector.push_back(Objects::makeIndicator(piece->sprite));
+                moveCollector.push_back(Objects::makeIndicator(piece->sprite, piece->name));
                 checkLine.insert(checkLine.begin(), moveCollector.begin(), moveCollector.end());
-                std::cout << checkLine.size() << std::endl;
                 return true;
             }
             moveCollector.push_back(dir[moveInd]);
