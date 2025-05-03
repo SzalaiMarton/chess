@@ -18,10 +18,13 @@ int main()
     bool check = false;
 	bool alreadyCheckForBlock = false;
     bool alreadyCheckForPromotion = false;
+    bool promotionWindowOpen = false;
 
     Assets::loadDirectoryElements(pathToOtherTextures);
     Assets::loadDirectoryElements(pathToPieceTextures);
 
+    Functions::PromotionWindow promotionWindow({"promotion_knight_white", "promotion_knight_white", "promotion_knight_white", "promotion_bishop_white"});
+    
     std::shared_ptr<Assets::ObjectTexture> boardTexture = Assets::getObjectTexture("board");
 
     if (boardTexture == nullptr) 
@@ -31,7 +34,7 @@ int main()
     }
 
     Objects::Board chessBoard(boardTexture);
-    window.setFramerateLimit(fps);
+    window.setFramerateLimit(60);
     Functions::initGame(chessBoard);
 
     while (window.isOpen())
@@ -59,15 +62,13 @@ int main()
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
 
-                std::cout << "current: " << currentPiece << "\n";
-
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
-                    if ((check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING) || currentPiece->isPinned)
+                    if ((check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING))
                     {
                         continue;
                     }
-                    if (currentPiece != prevPiece && currentPiece->legalMoves.size() == 0)
+                    if (currentPiece != prevPiece && currentPiece->legalMoves.size() == 0 && !currentPiece->isPinned)
                     {
                         currentPiece->getLegalMoves(chessBoard);
                     }
@@ -164,16 +165,17 @@ int main()
                     chessBoard.startingPosition();
                     turn = 1;
                 }
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L))
+                {
+                    promotionWindowOpen = true;
+                }
+                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+                {
+                    promotionWindowOpen = false;
+                }
             }
         }
-        if (currentPiece != nullptr)
-        {
-            Functions::refreshFrame(window, chessBoard, currentPiece);
-        }
-        else
-        {
-            Functions::refreshFrame(window, chessBoard);
-        }
+        Functions::refreshFrame(window, chessBoard, currentPiece, promotionWindowOpen, &promotionWindow);
     }
     return 0;
 }

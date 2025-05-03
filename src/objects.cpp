@@ -15,7 +15,7 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
     std::vector<Objects::Directions> directions;
     uint8_t indicatorAmount{};
 
-    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, indicatorAmount);
+    Objects::getMoveProperties(shared_from_this(), directions, indicatorAmount);
     this->legalMoves.resize(8);
 
     if (this->name == Objects::PAWN && !this->firstMove)
@@ -42,10 +42,10 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
         Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
         for (int i = 0; i < indicatorAmount; i++)
         {
-            cellCords.x = cellCords.x + (cellWidth * multiplierX);
-            cellCords.y = cellCords.y + (cellHeight * multiplierY);
+            cellCords.x = cellCords.x + ((int)cellWidth * (int)multiplierX);
+            cellCords.y = cellCords.y + ((int)cellHeight * (int)multiplierY);
             targetCell = board.getPieceByMouse(cellCords);
-            if (Objects::isTargetCellValid(targetCell, std::make_shared<Objects::Piece>(this), direction, onlyAttacks) == false)
+            if (Objects::isTargetCellValid(targetCell, shared_from_this(), direction, onlyAttacks) == false)
             {
                 break;
             }
@@ -70,8 +70,10 @@ void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
     std::vector<Objects::Directions> directions;
     uint8_t indicatorAmount{};
 
-    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, indicatorAmount);
+    this->deleteLegalMoves();
+    Objects::getMoveProperties(shared_from_this(), directions, indicatorAmount);
     this->legalMoves.resize(8);
+
 
     for (auto& direction : directions)
     {
@@ -79,7 +81,9 @@ void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
         cellCords.y = (int)this->sprite.getPosition().y;
         multiplierX = 0;
         multiplierY = 0;
+
         Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
+        
         for (int i = 0; i < indicatorAmount; i++)
         {
             cellCords.x = cellCords.x + (cellWidth * multiplierX);
@@ -87,7 +91,7 @@ void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
             targetCell = board.getPieceByMouse(cellCords);
             if (targetCell == nullptr || targetCell->color == this->color)
             {
-                return;
+                break;
             }
             else
             {
@@ -149,22 +153,22 @@ Objects::Directions Objects::addTwoDirections(Objects::Directions vertical, Obje
     {
         if (horizontal == Objects::WEST)
         {
-            return Objects::NORTHWEST;
+            return Objects::NORTH_WEST;
         }
         else if (horizontal == Objects::EAST)
         {
-            return Objects::NORTHEAST;
+            return Objects::NORTH_EAST;
         }
     }
     else if (vertical == Objects::SOUTH)
     {
         if (horizontal == Objects::WEST)
         {
-            return Objects::SOUTHWEST;
+            return Objects::SOUTH_WEST;
         }
         else if (horizontal == Objects::EAST)
         {
-            return Objects::SOUTHEAST;
+            return Objects::SOUTH_EAST;
         }
     }
 }
@@ -189,7 +193,7 @@ bool Objects::isHorizontalDir(Objects::Directions dir)
 
 bool Objects::isDiagonalDir(Objects::Directions dir)
 {
-    if (dir == Objects::NORTHEAST || dir == Objects::NORTHWEST || dir == Objects::SOUTHEAST || dir == Objects::SOUTHWEST)
+    if (dir == Objects::NORTH_EAST || dir == Objects::NORTH_WEST || dir == Objects::SOUTH_EAST || dir == Objects::SOUTH_WEST)
     {
         return true;
     }
@@ -210,12 +214,12 @@ Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
 
 std::shared_ptr<Objects::Indicator> Objects::makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant)
 {
-    auto indicatorTexture = Assets::getObjectTexture("indicator");
+    std::shared_ptr<Assets::ObjectTexture> indicatorTexture = Assets::getObjectTexture("indicator");
     if (indicatorTexture == nullptr)
     {
         return nullptr;
     }
-    auto legalMove = std::make_shared<Objects::Indicator>();
+    std::shared_ptr<Objects::Indicator> legalMove = std::make_shared<Objects::Indicator>();
     legalMove->targetName = targetName;
     legalMove->sprite = sprite;
     legalMove->sprite.setTexture(indicatorTexture->texture);
@@ -260,10 +264,12 @@ void Objects::Piece::getPinnedPieces(std::vector<std::shared_ptr<Objects::Piece>
     {
         return;
     }
+    
+    std::vector<std::shared_ptr<Objects::Piece>> inLinePieces;
 
     this->revaluePinningPieces(pinnedPieces);
-    std::vector<std::shared_ptr<Objects::Piece>> inLinePieces;
     this->getLegalMovesNoRestrictions(board);
+
     for (auto& dir : this->legalMoves)
     {
         for (auto& move : dir)
@@ -299,8 +305,8 @@ void Objects::Piece::revaluePinningPieces(std::vector<std::shared_ptr<Objects::P
     {
         if (pinnedPieces[i] == this->pinnedPiece)
         {
-            pinnedPieces.erase(pinnedPieces.begin()+i);
             pinnedPieces[i]->isPinned = false;
+            pinnedPieces.erase(pinnedPieces.begin()+i);
             this->pinnedPiece = nullptr;
             return;
         }
@@ -315,7 +321,7 @@ void Objects::Piece::getKingMoveNoRestriction(Objects::Board& board)
 	std::vector<Directions> directions;
 	uint8_t amount{};
 
-    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, amount);
+    Objects::getMoveProperties(shared_from_this(), directions, amount);
     amount = 1;
 	this->legalMoves.resize(8);
 
@@ -328,10 +334,10 @@ void Objects::Piece::getKingMoveNoRestriction(Objects::Board& board)
         Objects::getDirectionMultiplier(dir, multiplierX, multiplierY);
         for (uint8_t i = 0; i < amount; i++)
         {
-            cell.x = cell.x + (cellWidth * multiplierX);
-            cell.y = cell.y + (cellHeight * multiplierY);
+            cell.x = cell.x + ((int)cellWidth * (int)multiplierX);
+            cell.y = cell.y + ((int)cellHeight * (int)multiplierY);
             targetCell = board.getPieceByMouse(cell);
-            if (!Objects::isTargetCellValid(targetCell, std::make_shared<Objects::Piece>(this), dir))
+            if (!Objects::isTargetCellValid(targetCell, shared_from_this(), dir))
             {
                 break;
             }
@@ -435,19 +441,19 @@ std::string Objects::forDevDirToString(Objects::Directions dir)
     {
         return "WEST";
     }
-    else if (dir == Objects::SOUTHEAST)
+    else if (dir == Objects::SOUTH_EAST)
     {
         return "SOUTHEAST";
     }
-    else if (dir == Objects::SOUTHWEST)
+    else if (dir == Objects::SOUTH_WEST)
     {
         return "SOUTHWEST";
     }
-    else if (dir == Objects::NORTHEAST)
+    else if (dir == Objects::NORTH_EAST)
     {
         return "NORTHEAST";
     }
-    else if (dir == Objects::NORTHWEST)
+    else if (dir == Objects::NORTH_WEST)
     {
         return "NORTHWEST";
     }
@@ -508,7 +514,7 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
     sf::Vector2i cell{};
     std::shared_ptr<Objects::Piece> targetCell{};
 
-    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, amount);
+    Objects::getMoveProperties(shared_from_this(), directions, amount);
     this->legalMoves.resize(directions.size());
     
     for (auto& direction : directions)
@@ -542,12 +548,12 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
             {
                 offsetX *= -1; offsetY *= -1;
             }
-            cell.x += (cellWidth * multiplierX) + offsetX;
-            cell.y += (cellHeight * multiplierY) + offsetY;
+            cell.x += ((int)cellWidth * (int)multiplierX) + (int)offsetX;
+            cell.y += ((int)cellHeight * (int)multiplierY) + (int)offsetY;
             targetCell = board.getPieceByMouse(cell);
             if (board.isTargetOnBoard(targetCell))
             {
-                Objects::isTargetCellValid(targetCell, std::make_shared<Objects::Piece>(this), direction);
+                Objects::isTargetCellValid(targetCell, shared_from_this(), direction);
             }
             else
             {
@@ -617,19 +623,19 @@ void Objects::getDirectionMultiplier(Objects::Directions direction, short& x, sh
     case Objects::WEST:
         x = -1;
         break;
-    case Objects::NORTHWEST:
+    case Objects::NORTH_WEST:
         y = -1;
         x = -1;
         break;
-    case Objects::NORTHEAST:
+    case Objects::NORTH_EAST:
         y = -1;
         x = 1;
         break;
-    case Objects::SOUTHEAST:
+    case Objects::SOUTH_EAST:
         y = 1;
         x = 1;
         break;
-    case Objects::SOUTHWEST:
+    case Objects::SOUTH_WEST:
         y = 1;
         x = -1;
         break;
@@ -658,27 +664,7 @@ void Objects::Piece::setTexture(const sf::Texture& texture)
     this->sprite.setTexture(texture);
 }
 
-Objects::Piece::Piece()
-{
-    this->name = Objects::INVALID_NAME;
-    this->color = Objects::INVALID_COLOR;
-    this->firstMove = false;
-    this->isPinned = false;
-    this->enpassantLeft = false;
-    this->enpassantRight = false;
-}
-
-Objects::Piece::Piece(PieceName name, PieceColor color)
-{
-    this->name = name;
-    this->color = color;
-    this->firstMove = true;
-    this->isPinned = false;
-    this->enpassantLeft = false;
-    this->enpassantRight = false;
-}
-
-Objects::Piece::Piece(PieceName name, PieceColor color, const sf::Texture& texture)
+Objects::Piece::Piece(PieceName name, PieceColor color, sf::Texture& texture)
 {
     this->name = name;
     this->color = color;
@@ -687,6 +673,11 @@ Objects::Piece::Piece(PieceName name, PieceColor color, const sf::Texture& textu
     this->setTexture(texture);
     this->enpassantLeft = false;
     this->enpassantRight = false;
+}
+
+Objects::Piece::~Piece()
+{
+    std::cout << Objects::forDevNameToString(this->name) << " " << this->sprite.getPosition().x/95 << " " << this->sprite.getPosition().y/95 << " deleted\n";
 }
 
 Objects::PieceName Objects::convertStringToPieceName(const std::string& name)
@@ -758,7 +749,7 @@ void Objects::getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vect
         }
         case Objects::BISHOP:
         {
-            directions = { Objects::NORTHEAST, Objects::NORTHWEST, Objects::SOUTHEAST, Objects::SOUTHWEST };
+            directions = { Objects::NORTH_EAST, Objects::NORTH_WEST, Objects::SOUTH_EAST, Objects::SOUTH_WEST };
             amount = 8;
             break;
         }
@@ -770,13 +761,13 @@ void Objects::getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vect
         }
         case Objects::KING:
         {
-            directions = { Objects::NORTHEAST, Objects::NORTHWEST, Objects::SOUTHEAST, Objects::SOUTHWEST, Objects::NORTH, Objects::WEST, Objects::EAST, Objects::SOUTH };
+            directions = { Objects::NORTH_EAST, Objects::NORTH_WEST, Objects::SOUTH_EAST, Objects::SOUTH_WEST, Objects::NORTH, Objects::WEST, Objects::EAST, Objects::SOUTH };
             amount = 1;
             break;
         }
         case Objects::QUEEN:
         {
-            directions = { Objects::NORTHEAST, Objects::NORTHWEST, Objects::SOUTHEAST, Objects::SOUTHWEST, Objects::NORTH, Objects::WEST, Objects::EAST, Objects::SOUTH };
+            directions = { Objects::NORTH_EAST, Objects::NORTH_WEST, Objects::SOUTH_EAST, Objects::SOUTH_WEST, Objects::NORTH, Objects::WEST, Objects::EAST, Objects::SOUTH };
             amount = 8;
             break;
         }
@@ -932,7 +923,7 @@ std::shared_ptr<Objects::Piece> Objects::Board::checkPromotion()
 
 bool Objects::Board::checkForCheck(std::shared_ptr<Objects::Piece> piece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine)
 {
-    std::vector<Objects::Indicator*> moveCollector;
+    std::vector<std::shared_ptr<Objects::Indicator>> moveCollector;
     for (auto& dir : piece->legalMoves)
     {
         for (int moveInd = 0; moveInd < dir.size(); moveInd++)
@@ -941,6 +932,7 @@ bool Objects::Board::checkForCheck(std::shared_ptr<Objects::Piece> piece, std::s
             {
                 moveCollector.emplace_back(Objects::makeIndicator(piece->sprite, piece->name));
                 checkLine.insert(checkLine.begin(), moveCollector.begin(), moveCollector.end());
+
                 return true;
             }
             moveCollector.emplace_back(dir[moveInd]);
@@ -1028,4 +1020,11 @@ void Objects::Board::removeEnpassantPiece(sf::Vector2f pos, short turn)
     sf::Vector2i cell(pos.x, pos.y + (cellHeight * turn));
     auto pieceToDelete = this->getPieceByMouse(cell);
     this->removePiece(pieceToDelete);
+}
+
+Objects::Indicator::Indicator(const sf::Sprite& sprite, const Objects::PieceName& targetname, const bool enpassant)
+{
+    this->enpassant = enpassant;
+    this->sprite = sprite;
+    this->targetName = targetname;
 }

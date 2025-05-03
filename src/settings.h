@@ -16,8 +16,6 @@ const float boardScale = windowWidth / boardTextureWidth;
 const float cellWidth = (windowWidth - boardSide) / 8;
 const float cellHeight = (windowHeight - boardSide) / 8;
 const float pieceScale = cellWidth / pieceTextureWidth;
-const uint8_t fps = 60;
-const uint8_t noIndex = 255;
 
 const uint8_t firstBlackIndex = 0;
 const uint8_t lastBlackIndex = 15;

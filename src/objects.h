@@ -20,7 +20,7 @@ public:
         WHITE = 1,
         BLACK = -1,
         NONE = 2,
-        INVALID_COLOR
+        INVALID_COLOR = 3
     };
 
     enum PieceName
@@ -42,17 +42,22 @@ public:
         SOUTH = 1,
         NORTH = 2,
         WEST = 3,
-        NORTHWEST = 4,
-        NORTHEAST = 5,
-        SOUTHEAST = 6,
-        SOUTHWEST = 7
+        NORTH_WEST = 4,
+        NORTH_EAST = 5,
+        SOUTH_EAST = 6,
+        SOUTH_WEST = 7
     };
 
-    struct Indicator
+    class Indicator : public std::enable_shared_from_this<Indicator>
     {
+    public:
         sf::Sprite sprite;
         Objects::PieceName targetName;
         bool enpassant;
+
+        Indicator() = default;
+        //~Indicator();
+        Indicator(const sf::Sprite& sprite, const Objects::PieceName& targetname, const bool enpassant);
     };
 
     struct Vector2fComparator
@@ -70,7 +75,7 @@ public:
     };
 
    
-    class Piece
+    class Piece : public std::enable_shared_from_this<Piece>
     {
     public:
         bool firstMove;
@@ -83,9 +88,8 @@ public:
         std::vector<std::vector<std::shared_ptr<Indicator>>> legalMoves;
         std::shared_ptr<Piece> pinnedPiece;
 
-        Piece();
-        Piece(PieceName name, PieceColor color);
-        Piece(PieceName name, PieceColor color, const sf::Texture&);
+        Piece(PieceName name, PieceColor color, sf::Texture& texture);
+        ~Piece();
 
         void getLegalMoves(Objects::Board& board, bool onlyAttacks = false);
         void getLegalMovesNoRestrictions(Objects::Board& board);
@@ -135,7 +139,6 @@ public:
 
     static PieceName convertStringToPieceName(const std::string& name);
     static PieceColor convertCharToPieceColor(char color);
-    static Piece noPiece;
     static void getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vector<Objects::Directions>& directions, uint8_t& amount);
     static void getDirectionMultiplier(Objects::Directions direction, short& x, short& y);
     static bool isTargetCellValid(std::shared_ptr<Objects::Piece> targetCell, std::shared_ptr<Objects::Piece> piece, Objects::Directions direction, bool onlyAttack = false);

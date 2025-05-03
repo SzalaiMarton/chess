@@ -1,4 +1,2 @@
-- pinning piece -> finish removing pin from a piece && after check the moved piece gets pinned, even if its not pinned 
-- promotion -> finish promotion window
+- promotion -> window appears, but not looking good. Then make choice working
 - game ending check -> stalemate, win, lose
-
