@@ -80,8 +80,8 @@ public:
         PieceColor color;
         PieceName name;
         sf::Sprite sprite;
-        std::vector<std::vector<Indicator*>> legalMoves;
-        Piece* pinnedPiece;
+        std::vector<std::vector<std::shared_ptr<Indicator>>> legalMoves;
+        std::shared_ptr<Piece> pinnedPiece;
 
         Piece();
         Piece(PieceName name, PieceColor color);
@@ -93,8 +93,8 @@ public:
         void deletePiece();
         void deleteLegalMoves();
         void setTexture(const sf::Texture& texture);
-        void createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant = false);
-        bool isTargetInMoves(Objects::Piece* target);
+        void createLegalMove(uint8_t direction, std::shared_ptr<Objects::Piece> targetCell, bool enpassant = false);
+        bool isTargetInMoves(std::shared_ptr<Objects::Piece> target);
         void resetPiece();
         bool isMoveEnpassant();
         void getKnightMoves(Objects::Board& board);
@@ -102,42 +102,43 @@ public:
         void kingMoveGetter(Objects::Board& board);
         void getKingMoveNoRestriction(Objects::Board& board);
         void sortKingMoves(std::set<sf::Vector2f, Objects::Vector2fComparator>& dangerZone);
-        void getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells);
-        void getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces, Objects::Board& board);
-        void revaluePinningPieces(std::vector<Objects::Piece*>& pinnedPieces);
+        void getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells) const;
+        void getPinnedPieces(std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces, Objects::Board& board);
+        void revaluePinningPieces(std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces);
     };
 
     class Board
     {
     public:
         sf::Sprite sprite;
-        std::vector<Piece> onBoard;
+        std::vector<std::shared_ptr<Piece>> onBoard;
         std::vector<std::vector<float>> tilePoints;
-        void removePiece(Piece* piece);
+        void removePiece(std::shared_ptr<Piece> piece);
 
-        Board(Assets::ObjectTexture* texture);
+        Board(std::shared_ptr<Assets::ObjectTexture> texture);
+        
         void createTiles();
-        Objects::Piece* getPieceByMouse(sf::Vector2i& mousePos, Objects::Piece* skipPiece = nullptr);
-        void snapPieceToTile(Objects::Piece& piece, float x = -1.f, float y = -1.f);
-        bool isTargetOnBoard(Objects::Piece* piece);
+        std::shared_ptr<Objects::Piece> getPieceByMouse(sf::Vector2i& mousePos, std::shared_ptr<Objects::Piece> skipPiece = nullptr);
+        void snapPieceToTile(std::shared_ptr<Objects::Piece> piece, float x = -1.f, float y = -1.f);
+        bool isTargetOnBoard(std::shared_ptr<Objects::Piece> piece);
         void setAllEnpassantFalse();
-        void checkEnpassant(Objects::Piece* currentPiece);
+        void checkEnpassant(std::shared_ptr<Objects::Piece> currentPiece);
         void startingPosition();
-        Objects::Piece* checkPromotion();
-        bool checkForCheck(Objects::Piece* piece, Objects::Piece* king, std::vector<Objects::Indicator*>& checkLine);
-        void getBlockingPieces(int turn, std::vector<Objects::Indicator*>& checkLine);
-        bool canBlock(Objects::Piece* piece);
-        Objects::Piece* getKingByColor(Objects::PieceColor color);
+        std::shared_ptr<Objects::Piece> checkPromotion();
+        bool checkForCheck(std::shared_ptr<Objects::Piece> piece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>> &checkLine);
+        void getBlockingPieces(short turn, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine);
+        bool canBlock(std::shared_ptr<Objects::Piece> piece);
+        std::shared_ptr<Objects::Piece> getKingByColor(Objects::PieceColor color);
         void deleteAllMoves();
-        void removeEnpassantPiece(sf::Vector2f pos, int turn);
+        void removeEnpassantPiece(sf::Vector2f pos, short turn);
     };
 
-    static PieceName convertStringToPieceName(std::string& name);
+    static PieceName convertStringToPieceName(const std::string& name);
     static PieceColor convertCharToPieceColor(char color);
     static Piece noPiece;
-    static void getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, uint8_t& amount);
-    static void getDirectionMultiplier(Objects::Directions direction, int& x, int& y);
-    static bool isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, Objects::Directions direction, bool onlyAttack = false);
+    static void getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vector<Objects::Directions>& directions, uint8_t& amount);
+    static void getDirectionMultiplier(Objects::Directions direction, short& x, short& y);
+    static bool isTargetCellValid(std::shared_ptr<Objects::Piece> targetCell, std::shared_ptr<Objects::Piece> piece, Objects::Directions direction, bool onlyAttack = false);
 
     static Objects::Directions addTwoDirections(Objects::Directions vertical, Objects::Directions horizontal);
     static bool isVerticalDir(Objects::Directions dir);
@@ -145,7 +146,7 @@ public:
     static bool isDiagonalDir(Objects::Directions dir);
 
     static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
-    static Objects::Indicator* makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant = false);
+    static std::shared_ptr<Objects::Indicator> makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant = false);
 
     static std::string forDevNameToString(Objects::PieceName name);
     static char forDevColorToChar(Objects::PieceColor color);

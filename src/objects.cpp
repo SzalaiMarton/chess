@@ -9,18 +9,20 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
         return;
     }
     
-    int multiplierX{}, multiplierY{};
-    sf::Vector2i cell{};
-    Objects::Piece* targetCell{};
+    short multiplierX{}, multiplierY{};
+    sf::Vector2i cellCords{};
+    std::shared_ptr<Objects::Piece> targetCell{};
     std::vector<Objects::Directions> directions;
-    uint8_t amount{};
-    Objects::getMoveProperties(this, directions, amount);
+    uint8_t indicatorAmount{};
+
+    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, indicatorAmount);
     this->legalMoves.resize(8);
 
     if (this->name == Objects::PAWN && !this->firstMove)
     {
-        amount--;
+        indicatorAmount--;
     }
+
     if (this->name == Objects::PAWN)
     {
         this->checkPawnAttack(board, -1, 0, onlyAttacks); // left
@@ -33,22 +35,23 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
 
     for (auto& direction : directions)
     {
-        cell.x = (int)this->sprite.getPosition().x;
-        cell.y = (int)this->sprite.getPosition().y;
+        cellCords.x = (int)this->sprite.getPosition().x;
+        cellCords.y = (int)this->sprite.getPosition().y;
         multiplierX = 0;
         multiplierY = 0;
         Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
-        for (int i = 0; i < amount; i++)
+        for (int i = 0; i < indicatorAmount; i++)
         {
-            cell.x = cell.x + (cellWidth * multiplierX);
-            cell.y = cell.y + (cellHeight * multiplierY);
-            targetCell = board.getPieceByMouse(cell);
-            if (Objects::isTargetCellValid(targetCell, this, direction, onlyAttacks) == false)
+            cellCords.x = cellCords.x + (cellWidth * multiplierX);
+            cellCords.y = cellCords.y + (cellHeight * multiplierY);
+            targetCell = board.getPieceByMouse(cellCords);
+            if (Objects::isTargetCellValid(targetCell, std::make_shared<Objects::Piece>(this), direction, onlyAttacks) == false)
             {
                 break;
             }
         }
     }
+
     if (this->name == Objects::KING && !onlyAttacks)
     {
         this->kingMoveGetter(board);
@@ -61,26 +64,27 @@ void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
     // only used for rook, bishop, queen
     // only restriction is: ally is blocking since those cannot be pinned by ally
 
-    int multiplierX{}, multiplierY{};
-    sf::Vector2i cell{};
-    Objects::Piece* targetCell{};
+    short multiplierX{}, multiplierY{};
+    sf::Vector2i cellCords{};
+    std::shared_ptr<Objects::Piece> targetCell{};
     std::vector<Objects::Directions> directions;
-    uint8_t amount{};
-    Objects::getMoveProperties(this, directions, amount);
+    uint8_t indicatorAmount{};
+
+    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, indicatorAmount);
     this->legalMoves.resize(8);
 
     for (auto& direction : directions)
     {
-        cell.x = (int)this->sprite.getPosition().x;
-        cell.y = (int)this->sprite.getPosition().y;
+        cellCords.x = (int)this->sprite.getPosition().x;
+        cellCords.y = (int)this->sprite.getPosition().y;
         multiplierX = 0;
         multiplierY = 0;
         Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
-        for (int i = 0; i < amount; i++)
+        for (int i = 0; i < indicatorAmount; i++)
         {
-            cell.x = cell.x + (cellWidth * multiplierX);
-            cell.y = cell.y + (cellHeight * multiplierY);
-            targetCell = board.getPieceByMouse(cell);
+            cellCords.x = cellCords.x + (cellWidth * multiplierX);
+            cellCords.y = cellCords.y + (cellHeight * multiplierY);
+            targetCell = board.getPieceByMouse(cellCords);
             if (targetCell == nullptr || targetCell->color == this->color)
             {
                 return;
@@ -93,7 +97,7 @@ void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
     }
 }
 
-bool Objects::isTargetCellValid(Objects::Piece* targetCell, Objects::Piece* piece, Objects::Directions direction, bool onlyAttack)
+bool Objects::isTargetCellValid(std::shared_ptr<Objects::Piece>targetCell, std::shared_ptr<Objects::Piece> piece, Objects::Directions direction, bool onlyAttack)
 {
     //returns true if nothing blocking
     //returns false if something is blocking
@@ -204,14 +208,14 @@ Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
     }
 }
 
-Objects::Indicator* Objects::makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant)
+std::shared_ptr<Objects::Indicator> Objects::makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant)
 {
-    Assets::ObjectTexture* indicatorTexture = Assets::getObjectTexture("indicator");
+    auto indicatorTexture = Assets::getObjectTexture("indicator");
     if (indicatorTexture == nullptr)
     {
         return nullptr;
     }
-    Objects::Indicator* legalMove = new Objects::Indicator();
+    auto legalMove = std::make_shared<Objects::Indicator>();
     legalMove->targetName = targetName;
     legalMove->sprite = sprite;
     legalMove->sprite.setTexture(indicatorTexture->texture);
@@ -219,7 +223,8 @@ Objects::Indicator* Objects::makeIndicator(sf::Sprite sprite, Objects::PieceName
     return legalMove;
 }
 
-void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells)
+
+void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells) const
 {
 	uint8_t firstInd{}, lastInd{};
     if (this->color == Objects::WHITE)
@@ -234,19 +239,19 @@ void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f,
 	}
     for (uint8_t pieceInd = firstInd; pieceInd < lastInd; pieceInd++)
     {
-        board.onBoard[pieceInd].getLegalMoves(board, true);
-        for (auto& dir : board.onBoard[pieceInd].legalMoves)
+        board.onBoard[pieceInd]->getLegalMoves(board, true);
+        for (auto& dir : board.onBoard[pieceInd]->legalMoves)
         {
             for (auto& move : dir)
             {
                 cells.insert(move->sprite.getPosition());
             }
         }
-        board.onBoard[pieceInd].deleteLegalMoves();
+        board.onBoard[pieceInd]->deleteLegalMoves();
     }
 }
 
-void Objects::Piece::getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces, Objects::Board& board)
+void Objects::Piece::getPinnedPieces(std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces, Objects::Board& board)
 {
     // gets current piece's moves without enemy blocking its line, if an enemy's piece and king in the same line the piece gets added to pinnedPieces
     // else nothing happens
@@ -257,7 +262,7 @@ void Objects::Piece::getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces,
     }
 
     this->revaluePinningPieces(pinnedPieces);
-    std::vector<Objects::Piece*> inLinePieces;
+    std::vector<std::shared_ptr<Objects::Piece>> inLinePieces;
     this->getLegalMovesNoRestrictions(board);
     for (auto& dir : this->legalMoves)
     {
@@ -265,7 +270,8 @@ void Objects::Piece::getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces,
         {
             if (move->targetName != Objects::CELL && move->targetName != Objects::KING)
             {
-                inLinePieces.emplace_back(board.getPieceByMouse(*new sf::Vector2i(move->sprite.getPosition().x, move->sprite.getPosition().y)));
+                sf::Vector2i cord(move->sprite.getPosition().x, move->sprite.getPosition().y);
+                inLinePieces.emplace_back(board.getPieceByMouse(cord));
                 if (inLinePieces.size() > 1)
                 {
                     break;
@@ -287,7 +293,7 @@ void Objects::Piece::getPinnedPieces(std::vector<Objects::Piece*>& pinnedPieces,
     this->deleteLegalMoves();
 }
 
-void Objects::Piece::revaluePinningPieces(std::vector<Objects::Piece*>& pinnedPieces)
+void Objects::Piece::revaluePinningPieces(std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces)
 {
     for (int i = 0; i < pinnedPieces.size(); i++)
     {
@@ -303,14 +309,16 @@ void Objects::Piece::revaluePinningPieces(std::vector<Objects::Piece*>& pinnedPi
 
 void Objects::Piece::getKingMoveNoRestriction(Objects::Board& board)
 {
-	int multiplierX{}, multiplierY{};
+	short multiplierX{}, multiplierY{};
 	sf::Vector2i cell{};
-	Objects::Piece* targetCell{};
+    std::shared_ptr<Objects::Piece> targetCell{};
 	std::vector<Directions> directions;
 	uint8_t amount{};
-    Objects::getMoveProperties(this, directions, amount);
+
+    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, amount);
     amount = 1;
 	this->legalMoves.resize(8);
+
     for (auto& dir : directions)
     {
         cell.x = (int)this->sprite.getPosition().x;
@@ -323,7 +331,7 @@ void Objects::Piece::getKingMoveNoRestriction(Objects::Board& board)
             cell.x = cell.x + (cellWidth * multiplierX);
             cell.y = cell.y + (cellHeight * multiplierY);
             targetCell = board.getPieceByMouse(cell);
-            if (!Objects::isTargetCellValid(targetCell, this, dir))
+            if (!Objects::isTargetCellValid(targetCell, std::make_shared<Objects::Piece>(this), dir))
             {
                 break;
             }
@@ -451,7 +459,6 @@ std::string Objects::forDevDirToString(Objects::Directions dir)
 
 void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction, bool onlyAttack)
 {
-    sf::Vector2i cell;
     int y = 0;
     if (this->color == Objects::BLACK)
     {
@@ -461,9 +468,10 @@ void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction
     {
         y = -1;
     }
-    cell.x = this->sprite.getPosition().x + (cellWidth * x);
-    cell.y = this->sprite.getPosition().y + (cellHeight * y);
-    Objects::Piece* targetCell = board.getPieceByMouse(cell);
+
+    sf::Vector2i cell(this->sprite.getPosition().x + (cellWidth * x), this->sprite.getPosition().y + (cellHeight * y));
+    auto targetCell = board.getPieceByMouse(cell);
+    
     if (targetCell != nullptr)
     {
         if (onlyAttack)
@@ -495,20 +503,26 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
 {
     std::vector<Directions> directions;
     uint8_t amount{};
-    int multiplierX{}, multiplierY{};
-    int offsetX{}, offsetY{};
+    short multiplierX{}, multiplierY{};
+    short offsetX{}, offsetY{};
     sf::Vector2i cell{};
-    Objects::Piece* targetCell{};
-    Objects::getMoveProperties(this, directions, amount);
+    std::shared_ptr<Objects::Piece> targetCell{};
+
+    Objects::getMoveProperties(std::make_shared<Objects::Piece>(this), directions, amount);
     this->legalMoves.resize(directions.size());
+    
     for (auto& direction : directions)
     {
         cell.x = (int)this->sprite.getPosition().x;
         cell.y = (int)this->sprite.getPosition().y;
+
         multiplierX = 0; multiplierY = 0;
         offsetX = 0; offsetY = 0;
+
         Objects::getDirectionMultiplier(direction, multiplierX, multiplierY);
+        
         multiplierX *= 2; multiplierY *= 2;
+
         if (multiplierX == 0)
         {
             offsetX = cellWidth;
@@ -519,6 +533,7 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
             offsetX = 0;
             offsetY = cellHeight;
         }
+
         for (int i = 0; i < 2; i++)
         {
             cell.x = (int)this->sprite.getPosition().x;
@@ -532,7 +547,7 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
             targetCell = board.getPieceByMouse(cell);
             if (board.isTargetOnBoard(targetCell))
             {
-                Objects::isTargetCellValid(targetCell, this, direction);
+                Objects::isTargetCellValid(targetCell, std::make_shared<Objects::Piece>(this), direction);
             }
             else
             {
@@ -542,12 +557,12 @@ void Objects::Piece::getKnightMoves(Objects::Board& board)
     }
 }
 
-void Objects::Piece::createLegalMove(int direction, Objects::Piece* targetCell, bool enpassant)
+void Objects::Piece::createLegalMove(uint8_t direction, std::shared_ptr<Objects::Piece> targetCell, bool enpassant)
 {
     this->legalMoves[direction].emplace_back(Objects::makeIndicator(targetCell->sprite, targetCell->name, enpassant));
 }
 
-bool Objects::Piece::isTargetInMoves(Objects::Piece* target)
+bool Objects::Piece::isTargetInMoves(std::shared_ptr<Objects::Piece> target)
 {
     for (auto& direction : this->legalMoves)
     {
@@ -586,7 +601,7 @@ bool Objects::Piece::isMoveEnpassant()
     }
 }
 
-void Objects::getDirectionMultiplier(Objects::Directions direction, int& x, int& y)
+void Objects::getDirectionMultiplier(Objects::Directions direction, short& x, short& y)
 {
     switch (direction)
     {
@@ -623,7 +638,7 @@ void Objects::getDirectionMultiplier(Objects::Directions direction, int& x, int&
 
 void Objects::Piece::deletePiece()
 {
-    Assets::ObjectTexture* temp = Assets::getObjectTexture("cell");
+    auto temp = Assets::getObjectTexture("cell");
 
     if (temp == nullptr)
     {
@@ -674,7 +689,7 @@ Objects::Piece::Piece(PieceName name, PieceColor color, const sf::Texture& textu
     this->enpassantRight = false;
 }
 
-Objects::PieceName Objects::convertStringToPieceName(std::string& name)
+Objects::PieceName Objects::convertStringToPieceName(const std::string& name)
 {
     if (name == "king")
     {
@@ -721,7 +736,7 @@ Objects::PieceColor Objects::convertCharToPieceColor(char color)
     }
 }
 
-void Objects::getMoveProperties(Objects::Piece* piece, std::vector<Objects::Directions>& directions, uint8_t& amount)
+void Objects::getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vector<Objects::Directions>& directions, uint8_t& amount)
 {
     switch (piece->name)
     {
@@ -776,31 +791,31 @@ void Objects::getMoveProperties(Objects::Piece* piece, std::vector<Objects::Dire
 
 
 
-void Objects::Board::snapPieceToTile(Objects::Piece& piece, float x, float y)
+void Objects::Board::snapPieceToTile(std::shared_ptr<Objects::Piece> piece, float x, float y)
 {
     //get the piece pos and snap it to the closest tile
     //to get the closest tile: get the distance between piece and current tile the compare that with a range and see if its in it
     
     if (x != -1 && y != -1)
     {
-        piece.sprite.setPosition(x, y);
+        piece->sprite.setPosition(x, y);
     }
     else
     {
         for (auto& tile : this->tilePoints)
         {
-            float distanceX = std::abs(tile[0] - piece.sprite.getPosition().x);
-            float distanceY = std::abs(tile[1] - piece.sprite.getPosition().y);
+            float distanceX = std::abs(tile[0] - piece->sprite.getPosition().x);
+            float distanceY = std::abs(tile[1] - piece->sprite.getPosition().y);
             if (distanceX < cellWidth / 2 && distanceY < cellHeight / 2)
             {
-                piece.sprite.setPosition(tile[0], tile[1]);
+                piece->sprite.setPosition(tile[0], tile[1]);
                 return;
             }
         }
     }
 }
 
-bool Objects::Board::isTargetOnBoard(Objects::Piece* piece)
+bool Objects::Board::isTargetOnBoard(std::shared_ptr<Objects::Piece> piece)
 {
     if (piece == nullptr)
     {
@@ -817,20 +832,20 @@ void Objects::Board::setAllEnpassantFalse()
 {
     for (auto& piece : this->onBoard)
     {
-        if (piece.name == Objects::PAWN)
+        if (piece->name == Objects::PAWN)
         {
-            piece.enpassantLeft = false;
-            piece.enpassantRight = false;
+            piece->enpassantLeft = false;
+            piece->enpassantRight = false;
         }
     }
 }
 
-void Objects::Board::removePiece(Piece* piece)
+void Objects::Board::removePiece(std::shared_ptr<Piece> piece)
 {
     piece->deletePiece();
 }
 
-Objects::Board::Board(Assets::ObjectTexture* objTexture)
+Objects::Board::Board(std::shared_ptr<Assets::ObjectTexture> objTexture)
 {
     this->sprite.setTexture(objTexture->texture);
     this->sprite.setScale(boardScale, boardScale);
@@ -850,39 +865,41 @@ void Objects::Board::createTiles()
     }
 }
 
-Objects::Piece* Objects::Board::getPieceByMouse(sf::Vector2i& mousePos, Objects::Piece* skipPiece)
+std::shared_ptr<Objects::Piece> Objects::Board::getPieceByMouse(sf::Vector2i& mousePos, std::shared_ptr<Objects::Piece> skipPiece)
 {
     for (auto& piece : this->onBoard)
     {
-        if (skipPiece != nullptr && skipPiece == &piece)
+        if (skipPiece != nullptr && skipPiece == piece)
         {
             continue;
         }
-        if (piece.sprite.getGlobalBounds().contains((float)(mousePos.x), (float)(mousePos.y)))
+        if (piece->sprite.getGlobalBounds().contains((float)(mousePos.x), (float)(mousePos.y)))
         {
-            return &piece;
+            return piece;
         }
     }
     return nullptr;
 }
 
-void Objects::Board::checkEnpassant(Objects::Piece* currentPiece)
+void Objects::Board::checkEnpassant(std::shared_ptr<Objects::Piece> currentPiece)
 {
     if (!currentPiece->firstMove)
     {
         return;
     }
-    sf::Vector2i cell{};
-    Objects::Piece* targetCell{};
-    cell.x = currentPiece->sprite.getPosition().x + cellWidth;
-    cell.y = currentPiece->sprite.getPosition().y;
+    std::shared_ptr<Objects::Piece> targetCell{};
+    sf::Vector2i cell(currentPiece->sprite.getPosition().x + cellWidth, currentPiece->sprite.getPosition().y);
+    
     targetCell = this->getPieceByMouse(cell);
+    
     if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE)
     {
         targetCell->enpassantLeft = true;
     }
+    
     cell.x = currentPiece->sprite.getPosition().x - cellWidth;
     targetCell = this->getPieceByMouse(cell);
+    
     if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE)
     {
         targetCell->enpassantRight = true;
@@ -894,26 +911,26 @@ void Objects::Board::startingPosition()
     for (int index = 0; index < this->tilePoints.size(); index++) // using the same index for two vector since the sizes are always the same
     {
         this->snapPieceToTile(this->onBoard[index], this->tilePoints[index][0], this->tilePoints[index][1]);
-        if (this->onBoard[index].name != Objects::CELL && this->onBoard[index].name != Objects::INVALID_NAME)
+        if (this->onBoard[index]->name != Objects::CELL && this->onBoard[index]->name != Objects::INVALID_NAME)
         {
-            this->onBoard[index].resetPiece();
+            this->onBoard[index]->resetPiece();
         }
     }
 }
 
-Objects::Piece* Objects::Board::checkPromotion()
+std::shared_ptr<Objects::Piece> Objects::Board::checkPromotion()
 {
     for (auto& piece : this->onBoard)
     {
-        if (piece.name == Objects::PAWN && (piece.sprite.getPosition().y == this->tilePoints[0][1] || piece.sprite.getPosition().y == this->tilePoints[this->tilePoints.size()-1][1]))
+        if (piece->name == Objects::PAWN && (piece->sprite.getPosition().y == this->tilePoints[0][1] || piece->sprite.getPosition().y == this->tilePoints[this->tilePoints.size()-1][1]))
         {
-            return &piece;
+            return piece;
         }
     }
     return nullptr;
 }
 
-bool Objects::Board::checkForCheck(Objects::Piece* piece, Objects::Piece* king, std::vector<Objects::Indicator*>& checkLine)
+bool Objects::Board::checkForCheck(std::shared_ptr<Objects::Piece> piece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine)
 {
     std::vector<Objects::Indicator*> moveCollector;
     for (auto& dir : piece->legalMoves)
@@ -922,22 +939,22 @@ bool Objects::Board::checkForCheck(Objects::Piece* piece, Objects::Piece* king, 
         {
             if (king->sprite.getPosition() == dir[moveInd]->sprite.getPosition())
             {
-                moveCollector.push_back(Objects::makeIndicator(piece->sprite, piece->name));
+                moveCollector.emplace_back(Objects::makeIndicator(piece->sprite, piece->name));
                 checkLine.insert(checkLine.begin(), moveCollector.begin(), moveCollector.end());
                 return true;
             }
-            moveCollector.push_back(dir[moveInd]);
+            moveCollector.emplace_back(dir[moveInd]);
         }
         moveCollector.clear();
     }
     return false;
 }
 
-void Objects::Board::getBlockingPieces(int turn, std::vector<Objects::Indicator*>& checkLine)
+void Objects::Board::getBlockingPieces(short turn, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine)
 {
 	uint8_t firstInd{}, lastInd{};
     uint8_t dirIndex = 0;
-    std::vector<std::vector<Objects::Indicator*>> tempLegalMoves{};
+    std::vector<std::vector<std::shared_ptr<Objects::Indicator>>> tempLegalMoves{};
     if (turn == 1)
     {
         firstInd = firstWhiteIndex;
@@ -951,12 +968,12 @@ void Objects::Board::getBlockingPieces(int turn, std::vector<Objects::Indicator*
 	for (uint8_t i = firstInd; i < lastInd; i++)
 	{
         tempLegalMoves.resize(8);
-		if (this->onBoard[i].name == Objects::KING)
+		if (this->onBoard[i]->name == Objects::KING)
 		{
 			continue;
 		}
-		this->onBoard[i].getLegalMoves(*this);
-        for (auto& dir : this->onBoard[i].legalMoves)
+		this->onBoard[i]->getLegalMoves(*this);
+        for (auto& dir : this->onBoard[i]->legalMoves)
 		{
             for (auto& move : dir)
 			{
@@ -964,20 +981,20 @@ void Objects::Board::getBlockingPieces(int turn, std::vector<Objects::Indicator*
 				{
                     if (move->sprite.getPosition() == check->sprite.getPosition())
 					{
-                        tempLegalMoves[dirIndex].push_back(check);
+                        tempLegalMoves[dirIndex].emplace_back(check);
 					}
 				}
 			}
             dirIndex++;
 		}
         dirIndex = 0;
-		this->onBoard[i].deleteLegalMoves();
-        this->onBoard[i].legalMoves = tempLegalMoves;
+		this->onBoard[i]->deleteLegalMoves();
+        this->onBoard[i]->legalMoves = tempLegalMoves;
         tempLegalMoves.clear();
 	}
 }
 
-bool Objects::Board::canBlock(Objects::Piece* piece)
+bool Objects::Board::canBlock(std::shared_ptr<Objects::Piece> piece)
 {
     if (piece->legalMoves.size() != 0)
     {
@@ -986,15 +1003,15 @@ bool Objects::Board::canBlock(Objects::Piece* piece)
     return false;
 }
 
-Objects::Piece* Objects::Board::getKingByColor(Objects::PieceColor color)
+std::shared_ptr<Objects::Piece> Objects::Board::getKingByColor(Objects::PieceColor color)
 {
     if (color == Objects::BLACK)
     {
-        return &this->onBoard[blackKingIndex];
+        return this->onBoard[blackKingIndex];
     }
     else if (color == Objects::WHITE)
     {
-        return &this->onBoard[whiteKingIndex];
+        return this->onBoard[whiteKingIndex];
     }
 }
 
@@ -1002,15 +1019,13 @@ void Objects::Board::deleteAllMoves()
 {
     for (auto& piece : this->onBoard)
     {
-        piece.deleteLegalMoves();
+        piece->deleteLegalMoves();
     }
 }
 
-void Objects::Board::removeEnpassantPiece(sf::Vector2f pos, int turn)
+void Objects::Board::removeEnpassantPiece(sf::Vector2f pos, short turn)
 {
-    sf::Vector2i cell{};
-    cell.x = pos.x;
-    cell.y = pos.y + (cellHeight * turn);
-    Objects::Piece* pieceToDelete = this->getPieceByMouse(cell);
+    sf::Vector2i cell(pos.x, pos.y + (cellHeight * turn));
+    auto pieceToDelete = this->getPieceByMouse(cell);
     this->removePiece(pieceToDelete);
 }

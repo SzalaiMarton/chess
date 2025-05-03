@@ -1,22 +1,20 @@
-#include <iostream>
-#include "SFML/Graphics.hpp"
 #include "functions.h"
 
 sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), windowTitle);
 
 int main()
 {
-    Objects::Piece* currentPiece = nullptr;
-    Objects::Piece* targetPiece = nullptr;
-    Objects::Piece* prevPiece = nullptr;
-    Objects::Piece* prevRoundPiece = nullptr;
-    Objects::Piece* toBePromoted = nullptr;
+    std::shared_ptr<Objects::Piece> currentPiece = nullptr;
+    std::shared_ptr<Objects::Piece> targetPiece = nullptr;
+    std::shared_ptr<Objects::Piece> prevPiece = nullptr;
+    std::shared_ptr<Objects::Piece> prevRoundPiece = nullptr;
+    std::shared_ptr<Objects::Piece> toBePromoted = nullptr;
 
-    std::vector<Objects::Piece*> pinnedPieces{};
-	std::vector<Objects::Indicator*> checkLine{};
+    std::vector<std::shared_ptr<Objects::Piece>> pinnedPieces{};
+	std::vector<std::shared_ptr<Objects::Indicator>> checkLine{};
 
     float currentPieceLastPosX{}, currentPieceLastPosY{};
-    int turn = 1; //1 -> white, -1 -> black
+    short turn = 1; //1 -> white, -1 -> black
     bool check = false;
 	bool alreadyCheckForBlock = false;
     bool alreadyCheckForPromotion = false;
@@ -24,7 +22,7 @@ int main()
     Assets::loadDirectoryElements(pathToOtherTextures);
     Assets::loadDirectoryElements(pathToPieceTextures);
 
-    Assets::ObjectTexture* boardTexture = Assets::getObjectTexture("board");
+    std::shared_ptr<Assets::ObjectTexture> boardTexture = Assets::getObjectTexture("board");
 
     if (boardTexture == nullptr) 
     {
@@ -84,7 +82,7 @@ int main()
 
                         if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                         {
-                            chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
+                            chessBoard.snapPieceToTile(currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                             break;
                         }
 
@@ -103,11 +101,11 @@ int main()
 
                 targetPiece = chessBoard.getPieceByMouse(mousePos, currentPiece);
                 
-                chessBoard.snapPieceToTile(*currentPiece);
+                chessBoard.snapPieceToTile(currentPiece);
                 
                 if (targetPiece == nullptr || targetPiece->color == currentPiece->color) // no move
                 {
-                    chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
+                    chessBoard.snapPieceToTile(currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
                 else if (targetPiece->name == Objects::CELL && currentPiece->isTargetInMoves(targetPiece)) // regular move
                 {
@@ -140,7 +138,7 @@ int main()
                 }
                 else // not on board
                 {
-                    chessBoard.snapPieceToTile(*currentPiece, currentPieceLastPosX, currentPieceLastPosY);
+                    chessBoard.snapPieceToTile(currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
             }
             

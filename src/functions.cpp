@@ -1,18 +1,16 @@
 #include "functions.h"
 
-std::vector<Assets::ObjectTexture*> Functions::unsortedTextures;
-
-void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, Objects::Piece* piece)
+void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, std::shared_ptr<Objects::Piece> piece)
 {
     window.clear();
     window.draw(board.sprite);
     for (auto& obj : board.onBoard)
     {
-		if (piece == &obj)
+		if (piece == obj)
 		{
 			continue;
 		}
-        window.draw(obj.sprite);
+        window.draw(obj->sprite);
     }
 	if (piece != nullptr)
 	{
@@ -42,22 +40,20 @@ void Functions::initGame(Objects::Board& board)
 
 void Functions::placePieces(Objects::Board& board)
 {
-	int index = 0;
+	uint8_t index = 0;
 	for (auto& texture : Assets::pieceTextures)
 	{
-		char color;
-		std::string name;
+		Objects::PieceColor color;
+		Objects::PieceName name;
+
 		Functions::splitTextureName(texture->name, color, name);
-		Objects::Piece newPiece(Objects::convertStringToPieceName(name), Objects::convertCharToPieceColor(color), texture->texture);
-		newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
-		newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
-		newPiece.sprite.setScale(pieceScale, pieceScale);
-		if (name == "pawn")
+		auto newPiece = Functions::createNewPiece(board, name, color, texture, index);
+		if (name == Objects::PAWN)
 		{
 			for (int i = 0; i < 8; i++)
 			{
-				newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
-				newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
+				newPiece->sprite.setOrigin(newPiece->sprite.getLocalBounds().getSize().x / 2, newPiece->sprite.getLocalBounds().getSize().y / 2);
+				newPiece->sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
 				board.onBoard.emplace_back(newPiece);
 				index++;
 			}
@@ -75,15 +71,11 @@ void Functions::placePieces(Objects::Board& board)
 	}
 }
 
-void Functions::fillBlankWithCells(int amount, int& index, Objects::Board& board)
+void Functions::fillBlankWithCells(uint8_t amount, uint8_t& index, Objects::Board& board)
 {
 	for (int i = 0; i < amount; i++)
 	{
-		Objects::Piece newPiece(Objects::CELL, Objects::NONE, Assets::getObjectTexture("cell")->texture);
-		newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
-		newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
-		newPiece.sprite.setScale(pieceScale, pieceScale);
-		board.onBoard.emplace_back(newPiece);
+		board.onBoard.emplace_back(Functions::createNewPiece(board, Objects::CELL, Objects::NONE, Assets::getObjectTexture("cell"), index));
 		index++;
 	}
 }
@@ -91,7 +83,7 @@ void Functions::fillBlankWithCells(int amount, int& index, Objects::Board& board
 void Functions::sortPieceTextures()
 {
 	std::vector<std::string>& currentSide = blackPieceOrder;
-	Functions::unsortedTextures = Assets::pieceTextures;
+	std::vector<std::shared_ptr<Assets::ObjectTexture>> unsortedTextures = Assets::pieceTextures;
 	Assets::pieceTextures.clear();
 	for (int colorIndex = 0; colorIndex < colorOrder.size(); colorIndex++)
 	{
@@ -110,10 +102,10 @@ void Functions::sortPieceTextures()
 	}
 }
 
-void Functions::splitTextureName(std::string& initname, char& recolor, std::string& rename)
+void Functions::splitTextureName(std::string& initname, Objects::PieceColor& recolor, Objects::PieceName& rename)
 {
-	recolor = initname[0];
-	rename = initname.substr(1, initname.length());
+	rename = Objects::convertStringToPieceName(initname.substr(1, initname.length()));
+	recolor = Objects::convertCharToPieceColor(initname[0]);
 }
 
 bool Functions::isNameInRange(Objects::PieceName& name)
@@ -125,7 +117,7 @@ bool Functions::isNameInRange(Objects::PieceName& name)
 	return false;
 }
 
-bool Functions::isPieceMatchTurn(Objects::Piece* piece, int turn)
+bool Functions::isPieceMatchTurn(std::shared_ptr<Objects::Piece> piece, short turn)
 {
 	if (turn == piece->color)
 	{
@@ -134,12 +126,12 @@ bool Functions::isPieceMatchTurn(Objects::Piece* piece, int turn)
 	return false;
 }
 
-void Functions::choosePieceForPromotion(Objects::Piece* piecePromoted) // make a window where the player can select the desired piece
+void Functions::choosePieceForPromotion(std::shared_ptr<Objects::Piece> piecePromoted) // make a window where the player can select the desired piece
 {
 
 }
 
-void Functions::afterMove(Objects::Piece* currentPiece, Objects::Piece*& prevRoundPiece, int& turn, bool& check, Objects::Board& chessBoard, std::vector<Objects::Indicator*>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion, std::vector<Objects::Piece*>& pinnedPieces)
+void Functions::afterMove(std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece> prevRoundPiece, short& turn, bool& check, Objects::Board& chessBoard, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion, std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces)
 {
 	if (check && prevRoundPiece != nullptr)
 	{
@@ -163,9 +155,18 @@ void Functions::afterMove(Objects::Piece* currentPiece, Objects::Piece*& prevRou
 	alreadyCheckForPromotion = false;
 }
 
-void Functions::changePlace(Objects::Board& chessBoard, Objects::Piece* currentPiece, Objects::Piece* targetPiece, float currentPieceLastPosX, float currentPieceLastPosY)
+void Functions::changePlace(Objects::Board& chessBoard, std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece> targetPiece, float currentPieceLastPosX, float currentPieceLastPosY)
 {
-	chessBoard.snapPieceToTile(*targetPiece, currentPieceLastPosX, currentPieceLastPosY);
+	chessBoard.snapPieceToTile(targetPiece, currentPieceLastPosX, currentPieceLastPosY);
 	chessBoard.setAllEnpassantFalse();
 	currentPiece->deleteLegalMoves();
+}
+
+std::shared_ptr<Objects::Piece> Functions::createNewPiece(Objects::Board& board, Objects::PieceName name, Objects::PieceColor color, std::shared_ptr<Assets::ObjectTexture> texture, uint8_t index)
+{
+	Objects::Piece newPiece = *new Objects::Piece(name, color, texture->texture);
+	newPiece.sprite.setOrigin(newPiece.sprite.getLocalBounds().getSize().x / 2, newPiece.sprite.getLocalBounds().getSize().y / 2);
+	newPiece.sprite.setPosition(board.tilePoints[index][0], board.tilePoints[index][1]);
+	newPiece.sprite.setScale(pieceScale, pieceScale);
+	return std::make_shared<Objects::Piece>(newPiece);
 }

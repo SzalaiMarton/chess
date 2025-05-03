@@ -2,10 +2,10 @@
 #include <iostream>
 #include <filesystem>
 
-std::vector<Assets::ObjectTexture*> Assets::pieceTextures;
-std::vector<Assets::ObjectTexture*> Assets::otherTextures;
+std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::pieceTextures;
+std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::otherTextures;
 
-Assets::ObjectTexture* Assets::getObjectTexture(const std::string& name)
+std::shared_ptr<Assets::ObjectTexture> Assets::getObjectTexture(const std::string& name)
 {
     for(auto& texture : Assets::pieceTextures)
     {
@@ -74,3 +74,4 @@ Assets::ObjectTexture::ObjectTexture(const std::string& name, sf::Texture& textu
     this->name = name;
     this->texture = texture;
 }
+
