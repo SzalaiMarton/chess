@@ -62,6 +62,8 @@ int main()
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
 
+                std::cout << mousePos.x << " " << mousePos.y << "\n";
+                
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
                     if ((check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING))
@@ -149,7 +151,20 @@ int main()
                 alreadyCheckForPromotion = true;
                 if (toBePromoted != nullptr)
                 {
-                    std::cout << "promote" << std::endl;
+                    promotionWindowOpen = true;
+                    while (promotionWindowOpen)
+                    {
+                        if (event.type == sf::Event::MouseButtonPressed)
+                        {
+                            sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                            Objects::PieceName name = promotionWindow.getPromotionPiece(mousePos);
+                            if (name != Objects::INVALID_NAME)
+                            {
+                                promotionWindowOpen = false;
+                            }
+                            Functions::refreshFrame(window, chessBoard, currentPiece, promotionWindowOpen, &promotionWindow);
+                        }
+                    }
                 }
             }
             
@@ -164,14 +179,6 @@ int main()
                 {
                     chessBoard.startingPosition();
                     turn = 1;
-                }
-                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L))
-                {
-                    promotionWindowOpen = true;
-                }
-                else if (sf::Keyboard::isKeyPressed(sf::Keyboard::K))
-                {
-                    promotionWindowOpen = false;
                 }
             }
         }

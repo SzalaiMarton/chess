@@ -38,6 +38,7 @@ void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, st
 	if (promotoionOpen)
 	{
 		window.draw(promotionWindow->shape);
+		window.draw(promotionWindow->title);
 		for (auto& el : promotionWindow->options)
 		{
 			window.draw(el.shape);
@@ -148,11 +149,6 @@ bool Functions::isPieceMatchTurn(std::shared_ptr<Objects::Piece> piece, short tu
 	return false;
 }
 
-void Functions::choosePieceForPromotion(std::shared_ptr<Objects::Piece> piecePromoted) // make a window where the player can select the desired piece
-{
-
-}
-
 void Functions::afterMove(std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece>& prevRoundPiece, short& turn, bool& check, Objects::Board& chessBoard, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion, std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces)
 {
 	if (check)
@@ -207,27 +203,60 @@ std::shared_ptr<Objects::Piece> Functions::createNewPiece(Objects::Board& board,
 
 Functions::PromotionWindow::PromotionWindow(std::vector<std::string> options)
 {
+	this->shape.setRotation(90.f);
 	this->shape.setTexture(Assets::getObjectTexture("promotion")->texture);
 	this->shape.setOrigin(this->shape.getLocalBounds().width / 2, this->shape.getLocalBounds().height / 2);
 	this->shape.setScale(pieceScale, pieceScale);
 	this->shape.setPosition((float)windowWidth/2, (float)windowHeight/2);
+
+	this->title.setTexture(Assets::getObjectTexture("promotion_title")->texture);
+	this->title.setScale(pieceScale, pieceScale);
+	this->title.setOrigin(this->title.getGlobalBounds().width / 2, this->title.getGlobalBounds().height / 2);
+	this->title.setPosition(472.f, 327.f);
+	
 	this->createOptions(options);
+	this->reArrangeButtons();
 }
 
 void Functions::PromotionWindow::createOptions(std::vector<std::string> options)
 {
 	sf::Vector2f mainWindowSize = this->shape.getPosition();
-	for (size_t i = 0; i < options.size(); i++)
+	for (short i = 0; i < options.size(); i++)
 	{
-		sf::Vector2f pos(mainWindowSize.x, (mainWindowSize.y - this->shape.getLocalBounds().height/2) + (i * this->shape.getGlobalBounds().height / options.size()));
-		Functions::Button temp(pos, options[i]);
+		sf::Vector2f pos(0.f, 0.f);
+		Functions::Button temp(pos, options[i].substr(1));
 		this->options.emplace_back(temp);
 	}
 }
 
-Functions::Button::Button(sf::Vector2f pos, std::string name)
+void Functions::PromotionWindow::reArrangeButtons()
 {
-	this->shape.setOrigin(42.f, 42.f);
+	sf::FloatRect mainWindowSize = this->shape.getGlobalBounds();
+	float firstX = mainWindowSize.left + 17.f;
+	float fixedY = mainWindowSize.top + mainWindowSize.height / 2;
+	float gapX = (mainWindowSize.width - 20.f) / this->options.size();
+	
+	for (short i = 0; i < options.size(); i++)
+	{
+		sf::Vector2f pos(firstX + (i * gapX), fixedY);
+		options[i].shape.setPosition(pos);
+	}
+}
+
+Objects::PieceName Functions::PromotionWindow::getPromotionPiece(sf::Vector2i pos)
+{
+	for (auto& button : this->options)
+	{
+		if (button.shape.getGlobalBounds().contains(pos.x, pos.y))
+		{
+			return Objects::convertStringToPieceName(button.name);
+		}
+	}
+	return Objects::INVALID_NAME;
+}
+
+Functions::Button::Button(sf::Vector2f pos, const std::string& name)
+{
 	this->shape.setPosition(pos);
 	std::shared_ptr<Assets::ObjectTexture> texture = Assets::getObjectTexture(name);
 	if (texture != nullptr)
@@ -235,4 +264,5 @@ Functions::Button::Button(sf::Vector2f pos, std::string name)
 		this->shape.setTexture(texture->texture);
 	}
 	this->name = name;
+	std::cout << name << "\n";
 }
