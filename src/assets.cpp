@@ -1,6 +1,4 @@
 #include "assets.h"
-#include <iostream>
-#include <filesystem>
 
 std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::pieceTextures;
 std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::otherTextures;

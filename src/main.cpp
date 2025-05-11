@@ -2,6 +2,17 @@
 
 sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), windowTitle);
 
+/*
+static uint32_t allocCounter;
+
+void* operator new(size_t size)
+{
+    allocCounter++;
+    std::cout << "Allocating: " << size << std::endl;
+    return malloc(size);
+}
+*/
+
 int main()
 {
     std::shared_ptr<Objects::Piece> currentPiece = nullptr;
@@ -16,6 +27,7 @@ int main()
     float currentPieceLastPosX{}, currentPieceLastPosY{};
     short turn = 1; //1 -> white, -1 -> black
     bool check = false;
+    bool gameEnd = false;
 	bool alreadyCheckForBlock = false;
     bool alreadyCheckForPromotion = false;
     bool promotionWindowOpen = false;
@@ -23,8 +35,6 @@ int main()
     Assets::loadDirectoryElements(pathToOtherTextures);
     Assets::loadDirectoryElements(pathToPieceTextures);
 
-    Functions::PromotionWindow promotionWindow({"promotion_knight_white", "promotion_knight_white", "promotion_knight_white", "promotion_bishop_white"});
-    
     std::shared_ptr<Assets::ObjectTexture> boardTexture = Assets::getObjectTexture("board");
 
     if (boardTexture == nullptr) 
@@ -35,6 +45,12 @@ int main()
 
     Objects::Board chessBoard(boardTexture);
     window.setFramerateLimit(60);
+    
+    sf::Vector2f* center = new sf::Vector2f(chessBoard.sprite.getGlobalBounds().width / 2, chessBoard.sprite.getGlobalBounds().height / 2);
+    Functions::OutcomeWindow outcomeWindow(*center);
+    delete center;
+
+    Functions::PromotionWindow promotionWindow({ "promotion_knight", "promotion_rook", "promotion_queen", "promotion_bishop" });
     Functions::initGame(chessBoard);
 
     while (window.isOpen())
@@ -44,16 +60,12 @@ int main()
         {
             if (event.type == sf::Event::MouseButtonPressed)
             {
-                
-                if (check && !alreadyCheckForBlock)
+                if (!alreadyCheckForBlock)
                 {
-                    chessBoard.getBlockingPieces(turn, checkLine);
-                    alreadyCheckForBlock = true;
+                    Functions::blockingPieces(&chessBoard, check, alreadyCheckForBlock, turn, &checkLine);
                 }
 
-                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                currentPiece = chessBoard.getPieceByMouse(mousePos);
-
+                currentPiece = Functions::getCurrentPiece(window, chessBoard);
                 if (currentPiece == nullptr)
                 {
                     continue;
@@ -62,34 +74,32 @@ int main()
                 currentPieceLastPosX = currentPiece->sprite.getPosition().x;
                 currentPieceLastPosY = currentPiece->sprite.getPosition().y;
 
-                std::cout << mousePos.x << " " << mousePos.y << "\n";
-                
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
-                    if ((check && !chessBoard.canBlock(currentPiece) && currentPiece->name != Objects::KING))
+                    if ((check && !chessBoard.canPieceBlock(currentPiece) && currentPiece->name != Objects::KING) || currentPiece->isPinned)
                     {
                         continue;
                     }
-                    if (currentPiece != prevPiece && currentPiece->legalMoves.size() == 0 && !currentPiece->isPinned)
+                    else if (currentPiece != prevPiece && currentPiece->legalMoves.size() == 0 && !currentPiece->isPinned)
                     {
                         currentPiece->getLegalMoves(chessBoard);
                     }
-                    
+
                     prevPiece = currentPiece;
 
                     while (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
                         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
                         currentPiece->sprite.setPosition((float)mousePos.x, (float)mousePos.y);
 
                         if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
                         {
                             chessBoard.snapPieceToTile(currentPiece, currentPieceLastPosX, currentPieceLastPosY);
+                            currentPiece = nullptr;
                             break;
                         }
 
-                        Functions::refreshFrame(window, chessBoard, currentPiece);
+                        Functions::refreshFrame(window, chessBoard, currentPiece, false, nullptr, &checkLine);
                     }
                 }
                 else
@@ -101,11 +111,9 @@ int main()
             if (event.type == sf::Event::MouseButtonReleased && currentPiece != nullptr)
             {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
                 targetPiece = chessBoard.getPieceByMouse(mousePos, currentPiece);
-                
                 chessBoard.snapPieceToTile(currentPiece);
-                
+
                 if (targetPiece == nullptr || targetPiece->color == currentPiece->color) // no move
                 {
                     chessBoard.snapPieceToTile(currentPiece, currentPieceLastPosX, currentPieceLastPosY);
@@ -116,58 +124,70 @@ int main()
                     {
                         chessBoard.removeEnpassantPiece(currentPiece->sprite.getPosition(), turn);
                     }
-                
                     Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                    
                     if (currentPiece->name == Objects::PAWN)
                     {
                         chessBoard.checkEnpassant(currentPiece);
                     }
-                    
                     Functions::afterMove(currentPiece, prevRoundPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion, pinnedPieces);
+
+                    Objects::GameOutcome outcome = chessBoard.checkForOutcome(currentPiece->color, check, true);
+                    if (outcome != Objects::NO_OUTCOME)
+                    {
+                        outcomeWindow.changeTexture(outcome);
+                        gameEnd = true;
+                    }
                 }
                 else if (targetPiece->color != currentPiece->color && currentPiece->isTargetInMoves(targetPiece)) // attack move
                 {
                     chessBoard.removePiece(targetPiece);
-                    
                     Functions::changePlace(chessBoard, currentPiece, targetPiece, currentPieceLastPosX, currentPieceLastPosY);
-                    
                     if (currentPiece->name == Objects::PAWN)
                     {
                         chessBoard.checkEnpassant(currentPiece);
                     }
-                    
                     Functions::afterMove(currentPiece, prevRoundPiece, turn, check, chessBoard, checkLine, alreadyCheckForBlock, alreadyCheckForPromotion, pinnedPieces);
+
+                    Objects::GameOutcome outcome = chessBoard.checkForOutcome(currentPiece->color, check, true);
+                    if (outcome != Objects::NO_OUTCOME)
+                    {
+                        outcomeWindow.changeTexture(outcome);
+                        gameEnd = true;
+                    }
                 }
                 else // not on board
                 {
                     chessBoard.snapPieceToTile(currentPiece, currentPieceLastPosX, currentPieceLastPosY);
                 }
             }
-            
-            if (!alreadyCheckForPromotion)
+
+            if (!alreadyCheckForPromotion) // check promotion
             {
-                toBePromoted = chessBoard.checkPromotion();
+                toBePromoted = chessBoard.getPromotingPiece();
                 alreadyCheckForPromotion = true;
                 if (toBePromoted != nullptr)
                 {
                     promotionWindowOpen = true;
+                    Functions::refreshFrame(window, chessBoard, currentPiece, promotionWindowOpen, &promotionWindow, &checkLine);
+
                     while (promotionWindowOpen)
                     {
-                        if (event.type == sf::Event::MouseButtonPressed)
+                        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                         {
                             sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                            Objects::PieceName name = promotionWindow.getPromotionPiece(mousePos);
-                            if (name != Objects::INVALID_NAME)
+                            std::string name = promotionWindow.getPromotionButton(mousePos);
+                            if (name != "invalid")
                             {
+                                toBePromoted->transformPiece(name);
+                                toBePromoted->getLegalMoves(chessBoard, false);
+                                check = chessBoard.checkForCheck(toBePromoted, chessBoard.getKingByColor(Objects::getOpposingColor(currentPiece->color)), checkLine);
                                 promotionWindowOpen = false;
                             }
-                            Functions::refreshFrame(window, chessBoard, currentPiece, promotionWindowOpen, &promotionWindow);
                         }
                     }
                 }
             }
-            
+
             if (event.type == sf::Event::Closed)
             {
                 window.close();
@@ -182,7 +202,14 @@ int main()
                 }
             }
         }
-        Functions::refreshFrame(window, chessBoard, currentPiece, promotionWindowOpen, &promotionWindow);
+
+        Functions::refreshFrame(window, chessBoard, currentPiece, promotionWindowOpen, &promotionWindow, &checkLine, &outcomeWindow, gameEnd);
+
+        if (gameEnd)
+        {
+            break;
+        }
     }
+    std::cin.get();
     return 0;
 }

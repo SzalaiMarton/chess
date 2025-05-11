@@ -1,6 +1,29 @@
 #include "objects.h"
 #include "assets.h"
 
+void Objects::Piece::changesForPawn(Objects::Board& board, uint8_t& indicatorAmount, bool onlyAttacks)
+{
+    if (!this->firstMove)
+    {
+        indicatorAmount--;
+    }
+
+    this->checkPawnAttack(board, -1, 0, onlyAttacks); // left
+    this->checkPawnAttack(board, 1, 0, onlyAttacks); // right
+}
+
+bool Objects::Piece::isLegalMovesEmpty()
+{
+    for (auto& dir : this->legalMoves)
+    {
+        if (!dir.empty()) 
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
 {
     if (this->name == Objects::KNIGHT)
@@ -18,15 +41,9 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
     Objects::getMoveProperties(shared_from_this(), directions, indicatorAmount);
     this->legalMoves.resize(8);
 
-    if (this->name == Objects::PAWN && !this->firstMove)
-    {
-        indicatorAmount--;
-    }
-
     if (this->name == Objects::PAWN)
     {
-        this->checkPawnAttack(board, -1, 0, onlyAttacks); // left
-        this->checkPawnAttack(board, 1, 0, onlyAttacks); // right
+        this->changesForPawn(board, indicatorAmount, onlyAttacks);
         if (onlyAttacks)
         {
             return;
@@ -105,6 +122,7 @@ bool Objects::isTargetCellValid(std::shared_ptr<Objects::Piece>targetCell, std::
 {
     //returns true if nothing blocking
     //returns false if something is blocking
+
     if (targetCell != nullptr)
     {
         if (targetCell->name == Objects::CELL) // regular move
@@ -124,11 +142,12 @@ bool Objects::isTargetCellValid(std::shared_ptr<Objects::Piece>targetCell, std::
                 return false;
             }
         }
-        else if (piece->color == targetCell->color) // blocking by ally
+        else if (piece->color == targetCell->color && onlyAttack) // blocking by ally but if onlyAttack = true then add
         {
+            piece->createLegalMove(direction, targetCell);
             return false;
         }
-        else
+        else // anything else: right now only blocking by ally
         {
             return false;
         }
@@ -200,6 +219,12 @@ bool Objects::isDiagonalDir(Objects::Directions dir)
     return false;
 }
 
+void Objects::Piece::transformPiece(std::string name)
+{
+    this->setTexture(Assets::getObjectTexture(Objects::pieceColorToChar(this->color) + name)->texture);
+    this->name = Objects::convertStringToPieceName(name);
+}
+
 Objects::PieceColor Objects::getOpposingColor(Objects::PieceColor color)
 {
     if (color == Objects::WHITE)
@@ -231,16 +256,8 @@ std::shared_ptr<Objects::Indicator> Objects::makeIndicator(sf::Sprite sprite, Ob
 void Objects::Piece::getDangerZone(Objects::Board& board, std::set<sf::Vector2f, Objects::Vector2fComparator>& cells) const
 {
 	uint8_t firstInd{}, lastInd{};
-    if (this->color == Objects::WHITE)
-    {
-		firstInd = firstBlackIndex;
-		lastInd = lastBlackIndex;
-	}
-	else
-	{
-		firstInd = firstWhiteIndex;
-		lastInd = lastWhiteIndex;
-	}
+    Objects::getPieceIndexesByColor(this->color, firstInd, lastInd, true);
+
     for (uint8_t pieceInd = firstInd; pieceInd < lastInd; pieceInd++)
     {
         board.onBoard[pieceInd]->getLegalMoves(board, true);
@@ -403,7 +420,7 @@ std::string Objects::forDevNameToString(Objects::PieceName name)
     }
 }
 
-char Objects::forDevColorToChar(Objects::PieceColor color)
+char Objects::pieceColorToChar(Objects::PieceColor color)
 {
     if (color == Objects::WHITE)
     {
@@ -413,7 +430,7 @@ char Objects::forDevColorToChar(Objects::PieceColor color)
     {
         return 'b';
     }
-    else if (color == Objects::NONE)
+    else if (color == Objects::NONE_COLOR)
     {
         return 'n';
     }
@@ -484,15 +501,15 @@ void Objects::Piece::checkPawnAttack(Objects::Board& board, int x, int direction
         {
             this->createLegalMove(direction, targetCell);
         }
-        else if ((targetCell->color != this->color || targetCell->color == Objects::NONE) && this->enpassantRight && x == 1)
+        else if ((targetCell->color != this->color || targetCell->color == Objects::NONE_COLOR) && this->enpassantRight && x == 1)
         {
             this->createLegalMove(direction, targetCell, true);
         }
-        else if ((targetCell->color != this->color || targetCell->color == Objects::NONE) && this->enpassantLeft && x == -1)
+        else if ((targetCell->color != this->color || targetCell->color == Objects::NONE_COLOR) && this->enpassantLeft && x == -1)
         {
             this->createLegalMove(direction, targetCell, true);
         }
-        else if (targetCell->color != this->color && targetCell->color != Objects::NONE)
+        else if (targetCell->color != this->color && targetCell->color != Objects::NONE_COLOR)
         {
             this->createLegalMove(direction, targetCell);
         }
@@ -653,7 +670,7 @@ void Objects::Piece::deletePiece()
     }
     
     this->name = PieceName::CELL;
-    this->color = PieceColor::NONE;
+    this->color = PieceColor::NONE_COLOR;
     this->isPinned = false;
     this->legalMoves.clear();
     this->sprite.setTexture(temp->texture);
@@ -673,6 +690,7 @@ Objects::Piece::Piece(PieceName name, PieceColor color, sf::Texture& texture)
     this->setTexture(texture);
     this->enpassantLeft = false;
     this->enpassantRight = false;
+    this->canBlock = false;
 }
 
 Objects::Piece::~Piece()
@@ -722,7 +740,7 @@ Objects::PieceColor Objects::convertCharToPieceColor(char color)
     {
         case 'w': return Objects::WHITE;
         case 'b': return Objects::BLACK;
-        case 'n': return Objects::NONE;
+        case 'n': return Objects::NONE_COLOR;
         default: return Objects::INVALID_COLOR;
     }
 }
@@ -843,6 +861,14 @@ Objects::Board::Board(std::shared_ptr<Assets::ObjectTexture> objTexture)
     this->createTiles();
 }
 
+void Objects::Board::printAllPiece()
+{
+    for (auto& el : this->onBoard)
+    {
+        std::cout << Objects::pieceColorToChar(el->color) << " " << Objects::forDevNameToString(el->name) << std::endl;
+    }
+}
+
 void Objects::Board::createTiles()
 {
     float currentX = cellWidth/2;
@@ -883,7 +909,7 @@ void Objects::Board::checkEnpassant(std::shared_ptr<Objects::Piece> currentPiece
     
     targetCell = this->getPieceByMouse(cell);
     
-    if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE)
+    if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE_COLOR)
     {
         targetCell->enpassantLeft = true;
     }
@@ -891,7 +917,7 @@ void Objects::Board::checkEnpassant(std::shared_ptr<Objects::Piece> currentPiece
     cell.x = currentPiece->sprite.getPosition().x - cellWidth;
     targetCell = this->getPieceByMouse(cell);
     
-    if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE)
+    if (targetCell != nullptr && targetCell->name == Objects::PAWN && targetCell->color != currentPiece->color && targetCell->color != Objects::NONE_COLOR)
     {
         targetCell->enpassantRight = true;
     }
@@ -909,7 +935,7 @@ void Objects::Board::startingPosition()
     }
 }
 
-std::shared_ptr<Objects::Piece> Objects::Board::checkPromotion()
+std::shared_ptr<Objects::Piece> Objects::Board::getPromotingPiece()
 {
     for (auto& piece : this->onBoard)
     {
@@ -921,16 +947,18 @@ std::shared_ptr<Objects::Piece> Objects::Board::checkPromotion()
     return nullptr;
 }
 
-bool Objects::Board::checkForCheck(std::shared_ptr<Objects::Piece> piece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine)
+bool Objects::Board::checkForCheck(std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine)
 {
+    // check for check and gets the checkLine
+
     std::vector<std::shared_ptr<Objects::Indicator>> moveCollector;
-    for (auto& dir : piece->legalMoves)
+    for (auto& dir : currentPiece->legalMoves)
     {
         for (int moveInd = 0; moveInd < dir.size(); moveInd++)
         {
             if (king->sprite.getPosition() == dir[moveInd]->sprite.getPosition())
             {
-                moveCollector.emplace_back(Objects::makeIndicator(piece->sprite, piece->name));
+                moveCollector.emplace_back(Objects::makeIndicator(currentPiece->sprite, currentPiece->name));
                 checkLine.insert(checkLine.begin(), moveCollector.begin(), moveCollector.end());
 
                 return true;
@@ -942,43 +970,101 @@ bool Objects::Board::checkForCheck(std::shared_ptr<Objects::Piece> piece, std::s
     return false;
 }
 
-void Objects::Board::getBlockingPieces(short turn, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine)
+void Objects::getPieceIndexesByTurn(short turn, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed)
 {
-	uint8_t firstInd{}, lastInd{};
-    uint8_t dirIndex = 0;
-    std::vector<std::vector<std::shared_ptr<Objects::Indicator>>> tempLegalMoves{};
-    if (turn == 1)
+    if (!reversed)
     {
-        firstInd = firstWhiteIndex;
-        lastInd = lastWhiteIndex;
+        if (turn == 1)
+        {
+            firstIndex = firstWhiteIndex;
+            lastIndex = lastWhiteIndex;
+        }
+        else
+        {
+            firstIndex = firstBlackIndex;
+            lastIndex = lastBlackIndex;
+        }
     }
     else
     {
-        firstInd = firstBlackIndex;
-        lastInd = lastBlackIndex;
+        if (turn == 1)
+        {
+            firstIndex = firstBlackIndex;
+            lastIndex = lastBlackIndex;
+        }
+        else
+        {
+            firstIndex = firstWhiteIndex;
+            lastIndex = lastWhiteIndex;
+        }
     }
+}
+
+void Objects::getPieceIndexesByColor(Objects::PieceColor color, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed)
+{
+    if (!reversed)
+    {
+        if (color == Objects::WHITE)
+        {
+            firstIndex = firstWhiteIndex;
+            lastIndex = lastWhiteIndex;
+        }
+        else
+        {
+            firstIndex = firstBlackIndex;
+            lastIndex = lastBlackIndex;
+        }
+    }
+    else
+    {
+        if (color == Objects::WHITE)
+        {
+            firstIndex = firstBlackIndex;
+            lastIndex = lastBlackIndex;
+        }
+        else
+        {
+            firstIndex = firstWhiteIndex;
+            lastIndex = lastWhiteIndex;
+        }
+    }
+}
+
+void Objects::Board::getBlockingPieces(short turn, std::vector<std::shared_ptr<Objects::Indicator>>* checkLine)
+{
+    // this function goes through all the pieces that are now in turn and modifies their legalMoves to only have blocking moves
+
+	uint8_t firstInd{}, lastInd{};
+    uint8_t dirIndex = 0;
+    std::vector<std::vector<std::shared_ptr<Objects::Indicator>>> tempLegalMoves{};
+    Objects::getPieceIndexesByTurn(turn, firstInd, lastInd, false);
+
 	for (uint8_t i = firstInd; i < lastInd; i++)
 	{
         tempLegalMoves.resize(8);
-		if (this->onBoard[i]->name == Objects::KING)
+		
+        if (this->onBoard[i]->name == Objects::KING)
 		{
 			continue;
 		}
-		this->onBoard[i]->getLegalMoves(*this);
+		
+        this->onBoard[i]->getLegalMoves(*this);
         for (auto& dir : this->onBoard[i]->legalMoves)
 		{
             for (auto& move : dir)
 			{
-				for (auto& check : checkLine)
+				for (auto& check : *checkLine)
 				{
                     if (move->sprite.getPosition() == check->sprite.getPosition())
 					{
                         tempLegalMoves[dirIndex].emplace_back(check);
+                        this->onBoard[i]->canBlock = true;
 					}
 				}
 			}
             dirIndex++;
 		}
+
         dirIndex = 0;
 		this->onBoard[i]->deleteLegalMoves();
         this->onBoard[i]->legalMoves = tempLegalMoves;
@@ -986,13 +1072,9 @@ void Objects::Board::getBlockingPieces(short turn, std::vector<std::shared_ptr<O
 	}
 }
 
-bool Objects::Board::canBlock(std::shared_ptr<Objects::Piece> piece)
+bool Objects::Board::canPieceBlock(std::shared_ptr<Objects::Piece> piece)
 {
-    if (piece->legalMoves.size() != 0)
-    {
-        return true;
-    }
-    return false;
+    return piece->canBlock;
 }
 
 std::shared_ptr<Objects::Piece> Objects::Board::getKingByColor(Objects::PieceColor color)
@@ -1011,7 +1093,10 @@ void Objects::Board::deleteAllMoves()
 {
     for (auto& piece : this->onBoard)
     {
-        piece->deleteLegalMoves();
+        if (piece->name != Objects::CELL)
+        {
+            piece->deleteLegalMoves();
+        }
     }
 }
 
@@ -1020,6 +1105,78 @@ void Objects::Board::removeEnpassantPiece(sf::Vector2f pos, short turn)
     sf::Vector2i cell(pos.x, pos.y + (cellHeight * turn));
     auto pieceToDelete = this->getPieceByMouse(cell);
     this->removePiece(pieceToDelete);
+}
+
+void Objects::Board::resetPieceBools(short turn)
+{
+    uint8_t firstIndex{}, lastIndex{};
+    Objects::getPieceIndexesByTurn(turn, firstIndex, lastIndex, false);
+    for (uint8_t index = firstIndex; index < lastIndex; index++)
+    {
+        this->onBoard[index]->canBlock = false;
+    }
+}
+
+Objects::GameOutcome Objects::Board::checkForOutcome(Objects::PieceColor currentColor, bool check, bool reversedColor)
+{
+    uint8_t firstIndex{}, lastIndex{};
+    Objects::getPieceIndexesByColor(currentColor, firstIndex, lastIndex, reversedColor);
+    for (uint8_t index = firstIndex; index < lastIndex; index++)
+    {
+        if (this->onBoard[index]->color != Objects::NONE_COLOR)
+        {
+            if (check)
+            {
+                if (this->canPieceBlock(this->onBoard[index]) || this->onBoard[index]->name == Objects::KING)
+                {
+                    this->onBoard[index]->getLegalMoves(*this);
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                this->onBoard[index]->getLegalMoves(*this);
+            }
+
+            if (!this->onBoard[index]->isLegalMovesEmpty())
+            {
+                this->onBoard[index]->deleteLegalMoves();
+                return Objects::NO_OUTCOME;
+            }
+
+            this->onBoard[index]->deleteLegalMoves();
+        }
+    }
+
+    if (currentColor == Objects::BLACK)
+    {
+        if (check)
+        {
+            std::cout << "lose\n";
+            return Objects::BLACK_WIN;
+        }
+        else
+        {
+            std::cout << "stalemate\n";
+            return Objects::STALEMATE;
+        }
+    }
+    else
+    {
+        if (check)
+        {
+            std::cout << "win\n";
+            return Objects::WHITE_WIN;
+        }
+        else
+        {
+            std::cout << "stalemate\n";
+            return Objects::STALEMATE;
+        }
+    }
 }
 
 Objects::Indicator::Indicator(const sf::Sprite& sprite, const Objects::PieceName& targetname, const bool enpassant)

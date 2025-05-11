@@ -1,18 +1,11 @@
 #ifndef ASSETS_H
 #define ASSETS_H
 
-#include <string>
-#include <vector>
-#include <filesystem>
-#include <iostream>
-#include "SFML/Graphics.hpp"
 #include "settings.h"
-
 
 class Assets
 {
 public:
-    
     class ObjectTexture
     {
     public:

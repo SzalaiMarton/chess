@@ -1,21 +1,30 @@
 #include "functions.h"
 
-void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, std::shared_ptr<Objects::Piece> piece, bool promotoionOpen, Functions::PromotionWindow* promotionWindow)
+void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, std::shared_ptr<Objects::Piece> piece, bool promotoionOpen, Functions::PromotionWindow* promotionWindow, std::vector<std::shared_ptr<Objects::Indicator>>* checkLine, Functions::OutcomeWindow* outcomeWindow, bool gameEnd)
 {
     window.clear();
     window.draw(board.sprite);
     
-	for (auto& obj : board.onBoard)
+	for (auto& p : board.onBoard)
     {
-		if (piece == obj)
+		if (piece == p)
 		{
 			continue;
 		}
 		else
 		{
-			window.draw(obj->sprite);
+			window.draw(p->sprite);
 		}
     }
+
+	if (!checkLine->empty())
+	{
+		for (auto& el : *checkLine)
+		{
+			el->sprite.setTexture(Assets::getObjectTexture("ind_test")->texture);
+			window.draw(el->sprite);
+		}
+	}
 
 	if (piece != nullptr)
 	{
@@ -37,15 +46,22 @@ void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, st
 
 	if (promotoionOpen)
 	{
+		std::cout << "dsadsa" << std::endl;
 		window.draw(promotionWindow->shape);
 		window.draw(promotionWindow->title);
+		std::cout << "dsadsa" << std::endl;
 		for (auto& el : promotionWindow->options)
 		{
 			window.draw(el.shape);
 		}
 	}
 
-    window.display();
+	if (gameEnd)
+	{
+		window.draw(outcomeWindow->shape);
+	}
+    
+	window.display();
 }
 
 void Functions::initGame(Objects::Board& board)
@@ -65,7 +81,7 @@ void Functions::placePieces(Objects::Board& board)
 		Objects::PieceName name;
 
 		Functions::splitTextureName(texture->name, color, name);
-		
+ 
 		if (name == Objects::PAWN)
 		{
 			for (int i = 0; i < 8; i++)
@@ -94,9 +110,10 @@ void Functions::placePieces(Objects::Board& board)
 
 void Functions::fillBlankWithCells(uint8_t amount, uint8_t& index, Objects::Board& board)
 {
+	std::shared_ptr<Assets::ObjectTexture> cellTexture = Assets::getObjectTexture("cell");
 	for (int i = 0; i < amount; i++)
 	{
-		Functions::createNewPiece(board, Objects::CELL, Objects::NONE, Assets::getObjectTexture("cell"), index);
+		Functions::createNewPiece(board, Objects::CELL, Objects::NONE_COLOR, cellTexture, index);
 		index++;
 	}
 }
@@ -151,7 +168,7 @@ bool Functions::isPieceMatchTurn(std::shared_ptr<Objects::Piece> piece, short tu
 
 void Functions::afterMove(std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece>& prevRoundPiece, short& turn, bool& check, Objects::Board& chessBoard, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion, std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces)
 {
-	if (check)
+	if (check && currentPiece->name != Objects::KING)
 	{
 		currentPiece->isPinned = true;
 		prevRoundPiece->pinnedPiece = currentPiece;
@@ -162,16 +179,18 @@ void Functions::afterMove(std::shared_ptr<Objects::Piece> currentPiece, std::sha
 		currentPiece->getPinnedPieces(pinnedPieces, chessBoard);
 	}
 
+	checkLine.clear();
 	check = false;
 
-	if (currentPiece->name != Objects::KING)
+	if (currentPiece->name != Objects::KING) // get checkLine
 	{
 		currentPiece->getLegalMoves(chessBoard, true);
 		check = chessBoard.checkForCheck(currentPiece, chessBoard.getKingByColor(Objects::getOpposingColor(currentPiece->color)), checkLine);
 		currentPiece->deleteLegalMoves();
 	}
-	
+
 	chessBoard.deleteAllMoves();
+	chessBoard.resetPieceBools(turn);
 	prevRoundPiece = currentPiece;
 	alreadyCheckForBlock = false;
 	alreadyCheckForPromotion = false;
@@ -201,6 +220,21 @@ std::shared_ptr<Objects::Piece> Functions::createNewPiece(Objects::Board& board,
 	return newPiece;
 }
 
+std::shared_ptr<Objects::Piece> Functions::getCurrentPiece(sf::RenderWindow& window, Objects::Board& chessBoard)
+{
+	sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+	return chessBoard.getPieceByMouse(mousePos);
+}
+
+void Functions::blockingPieces(Objects::Board* chessBoard, bool check, bool& alreadyCheckForBlock, short turn, std::vector<std::shared_ptr<Objects::Indicator>>* checkLine)
+{
+	if (check)
+	{
+		chessBoard->getBlockingPieces(turn, checkLine);
+		alreadyCheckForBlock = true;
+	}
+}
+
 Functions::PromotionWindow::PromotionWindow(std::vector<std::string> options)
 {
 	this->shape.setRotation(90.f);
@@ -224,7 +258,7 @@ void Functions::PromotionWindow::createOptions(std::vector<std::string> options)
 	for (short i = 0; i < options.size(); i++)
 	{
 		sf::Vector2f pos(0.f, 0.f);
-		Functions::Button temp(pos, options[i].substr(1));
+		Functions::Button temp(pos, options[i]);
 		this->options.emplace_back(temp);
 	}
 }
@@ -243,16 +277,16 @@ void Functions::PromotionWindow::reArrangeButtons()
 	}
 }
 
-Objects::PieceName Functions::PromotionWindow::getPromotionPiece(sf::Vector2i pos)
+std::string Functions::PromotionWindow::getPromotionButton(sf::Vector2i pos)
 {
 	for (auto& button : this->options)
 	{
 		if (button.shape.getGlobalBounds().contains(pos.x, pos.y))
 		{
-			return Objects::convertStringToPieceName(button.name);
+			return button.name;
 		}
 	}
-	return Objects::INVALID_NAME;
+	return "invalid";
 }
 
 Functions::Button::Button(sf::Vector2f pos, const std::string& name)
@@ -263,6 +297,37 @@ Functions::Button::Button(sf::Vector2f pos, const std::string& name)
 	{
 		this->shape.setTexture(texture->texture);
 	}
-	this->name = name;
-	std::cout << name << "\n";
+	this->name = name.substr(name.find("_") + 1);
+}
+
+Functions::OutcomeWindow::OutcomeWindow(const sf::Vector2f& center)
+{
+	std::string textName;
+	
+	this->shape.setOrigin(70.f,75.f);
+	this->shape.scale(pieceScale, pieceScale);
+	this->shape.setPosition(center);
+}
+
+void Functions::OutcomeWindow::changeTexture(Objects::GameOutcome outcome)
+{
+	if (outcome == Objects::BLACK_WIN)
+	{
+		std::cout << "blackWIn" << std::endl;
+		this->shape.setTexture(Assets::getObjectTexture("black_win")->texture);
+	}
+	else if (outcome == Objects::WHITE_WIN)
+	{
+		std::cout << "white win" << std::endl;
+		this->shape.setTexture(Assets::getObjectTexture("white_win")->texture);
+	}
+	else if (outcome == Objects::STALEMATE)
+	{
+		std::cout << "stalemate" << std::endl;
+		this->shape.setTexture(Assets::getObjectTexture("stalemate")->texture);
+	}
+	else
+	{
+		return;
+	}
 }

@@ -1,25 +1,28 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <set>
+
 #include "assets.h"
 #include "settings.h"
-#include "SFML/Graphics.hpp"
 
 class Objects
 {
 public:
-
     class Board;
+
+    enum GameOutcome
+    {
+        WHITE_WIN = 0,
+        BLACK_WIN = 1,
+        STALEMATE = 2,
+        NO_OUTCOME = 3
+    };
 
     enum PieceColor
     {
         WHITE = 1,
         BLACK = -1,
-        NONE = 2,
+        NONE_COLOR = 2,
         INVALID_COLOR = 3
     };
 
@@ -78,6 +81,7 @@ public:
     class Piece : public std::enable_shared_from_this<Piece>
     {
     public:
+        bool canBlock;
         bool firstMove;
         bool isPinned;
         bool enpassantLeft;
@@ -102,6 +106,9 @@ public:
         void resetPiece();
         bool isMoveEnpassant();
         void getKnightMoves(Objects::Board& board);
+        void transformPiece(std::string name);
+        void changesForPawn(Objects::Board& board, uint8_t& indicatorAmount, bool onlyAttacks);
+        bool isLegalMovesEmpty();
 
         void kingMoveGetter(Objects::Board& board);
         void getKingMoveNoRestriction(Objects::Board& board);
@@ -121,6 +128,8 @@ public:
 
         Board(std::shared_ptr<Assets::ObjectTexture> texture);
         
+        void printAllPiece();
+
         void createTiles();
         std::shared_ptr<Objects::Piece> getPieceByMouse(sf::Vector2i& mousePos, std::shared_ptr<Objects::Piece> skipPiece = nullptr);
         void snapPieceToTile(std::shared_ptr<Objects::Piece> piece, float x = -1.f, float y = -1.f);
@@ -128,13 +137,15 @@ public:
         void setAllEnpassantFalse();
         void checkEnpassant(std::shared_ptr<Objects::Piece> currentPiece);
         void startingPosition();
-        std::shared_ptr<Objects::Piece> checkPromotion();
-        bool checkForCheck(std::shared_ptr<Objects::Piece> piece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>> &checkLine);
-        void getBlockingPieces(short turn, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine);
-        bool canBlock(std::shared_ptr<Objects::Piece> piece);
+        std::shared_ptr<Objects::Piece> getPromotingPiece();
+        bool checkForCheck(std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece> king, std::vector<std::shared_ptr<Objects::Indicator>> &checkLine);
+        void getBlockingPieces(short turn, std::vector<std::shared_ptr<Objects::Indicator>>* checkLine);
+        bool canPieceBlock(std::shared_ptr<Objects::Piece> piece);
         std::shared_ptr<Objects::Piece> getKingByColor(Objects::PieceColor color);
         void deleteAllMoves();
         void removeEnpassantPiece(sf::Vector2f pos, short turn);
+        void resetPieceBools(short turn);
+        Objects::GameOutcome checkForOutcome(Objects::PieceColor currentColor, bool check, bool reversedColor);
     };
 
     static PieceName convertStringToPieceName(const std::string& name);
@@ -151,8 +162,11 @@ public:
     static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
     static std::shared_ptr<Objects::Indicator> makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant = false);
 
+    static void getPieceIndexesByTurn(short turn, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed);
+    static void getPieceIndexesByColor(Objects::PieceColor color, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed);
+
     static std::string forDevNameToString(Objects::PieceName name);
-    static char forDevColorToChar(Objects::PieceColor color);
+    static char pieceColorToChar(Objects::PieceColor color);
     static std::string forDevDirToString(Objects::Directions dir);
 };
 

@@ -2,12 +2,10 @@
 #define FUNCTIONS_H
 
 #include "objects.h"
-#include "SFML/Graphics.hpp"
 
 class Functions
 {
 public:
-
     class Button
     {
     public:
@@ -30,10 +28,20 @@ public:
 
         void createOptions(std::vector<std::string> options);
         void reArrangeButtons();
-        Objects::PieceName getPromotionPiece(sf::Vector2i pos);
+        std::string getPromotionButton(sf::Vector2i pos);
     };
 
-    static void refreshFrame(sf::RenderWindow& window, Objects::Board& board, std::shared_ptr<Objects::Piece> piece = nullptr, bool promotionOpen = false, Functions::PromotionWindow* promotionWindow = nullptr);
+    class OutcomeWindow
+    {
+    public:
+        sf::Sprite shape;
+
+        OutcomeWindow(const sf::Vector2f& center);
+
+        void changeTexture(Objects::GameOutcome outcome);
+    };
+
+    static void refreshFrame(sf::RenderWindow& window, Objects::Board& board, std::shared_ptr<Objects::Piece> piece = nullptr, bool promotionOpen = false, Functions::PromotionWindow* promotionWindow = nullptr, std::vector<std::shared_ptr<Objects::Indicator>>* checkLine = {}, Functions::OutcomeWindow* outcomeWindow = nullptr, bool gameEnd = false);
     static void initGame(Objects::Board& board);
     static void placePieces(Objects::Board& board);
     static void fillBlankWithCells(uint8_t amount, uint8_t& index, Objects::Board& board);
@@ -44,6 +52,8 @@ public:
     static void afterMove(std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece>& prevRoundPiece, short& turn, bool& check, Objects::Board& chessBoard, std::vector<std::shared_ptr<Objects::Indicator>>& checkLine, bool& alreadyCheckForBlock, bool& alreadyCheckForPromotion, std::vector<std::shared_ptr<Objects::Piece>>& pinnedPieces);
     static void changePlace(Objects::Board& chessBoard, std::shared_ptr<Objects::Piece> currentPiece, std::shared_ptr<Objects::Piece> targetPiece, float currentPieceLastPosX, float currentPieceLastPosY);
     static std::shared_ptr<Objects::Piece> createNewPiece(Objects::Board& board, Objects::PieceName name, Objects::PieceColor color, std::shared_ptr<Assets::ObjectTexture> texture, uint8_t index);
+    static std::shared_ptr<Objects::Piece> getCurrentPiece(sf::RenderWindow& window, Objects::Board& chessBoard);
+    static void blockingPieces(Objects::Board* chessBoard, bool check, bool& alreadyCheckForBlock, short turn, std::vector<std::shared_ptr<Objects::Indicator>>* checkLine);
 };
 
 #endif

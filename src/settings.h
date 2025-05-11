@@ -3,6 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <algorithm>
+#include <set>
+#include "SFML/Graphics.hpp"
+#include <filesystem>
 
 const float boardTextureWidth = 532.f; // board height is the same
 const float boardSide = 30.f; // the side that needs to be subtracted from board to get the playing field
