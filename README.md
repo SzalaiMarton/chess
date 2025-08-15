@@ -1,5 +1,12 @@
+### Description:
 - This is my first-ever solo project, developed in C++ using the SFML library. 
-- While it may still be a bit rough around the edges, it represents my first step into creating something entirely on my own.
+- It may still be a bit messy, but it represents my first step into creating something entirely on my own.
+
+### Goal:
+- Create a fully functional chess game.
+- To deepen my understanding of C++. When I began this project, my knowledge of the language was minimal.
+
+### Screenshots:
 <p align="center">
   <img src="screenshots/screenshots_1.png" alt="Screenshot" width="300">
   <img src="screenshots/screenshots_2.png" alt="Screenshot" width="300">
