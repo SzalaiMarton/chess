@@ -1,13 +1,10 @@
-#ifndef OBJECTS_H
-#define OBJECTS_H
-
+#pragma once
 
 #include "assets.h"
 #include "settings.h"
 
-class Objects
+namespace Objects
 {
-public:
     class Board;
 
     enum GameOutcome
@@ -59,7 +56,6 @@ public:
         bool enpassant;
 
         Indicator() = default;
-        //~Indicator();
         Indicator(const sf::Sprite& sprite, const Objects::PieceName& targetname, const bool enpassant);
     };
 
@@ -148,26 +144,24 @@ public:
         Objects::GameOutcome checkForOutcome(Objects::PieceColor currentColor, bool check, bool reversedColor);
     };
 
-    static PieceName convertStringToPieceName(const std::string& name);
-    static PieceColor convertCharToPieceColor(char color);
-    static void getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vector<Objects::Directions>& directions, uint8_t& amount);
-    static void getDirectionMultiplier(Objects::Directions direction, short& x, short& y);
-    static bool isTargetCellValid(std::shared_ptr<Objects::Piece> targetCell, std::shared_ptr<Objects::Piece> piece, Objects::Directions direction, bool onlyAttack = false);
+    PieceName convertStringToPieceName(const std::string& name);
+    PieceColor convertCharToPieceColor(char color);
+    void getMoveProperties(std::shared_ptr<Objects::Piece> piece, std::vector<Objects::Directions>& directions, uint8_t& amount);
+    void getDirectionMultiplier(Objects::Directions direction, short& x, short& y);
+    bool isTargetCellValid(std::shared_ptr<Objects::Piece> targetCell, std::shared_ptr<Objects::Piece> piece, Objects::Directions direction, bool onlyAttack = false);
 
-    static Objects::Directions addTwoDirections(Objects::Directions vertical, Objects::Directions horizontal);
-    static bool isVerticalDir(Objects::Directions dir);
-    static bool isHorizontalDir(Objects::Directions dir);
-    static bool isDiagonalDir(Objects::Directions dir);
+    Objects::Directions addTwoDirections(Objects::Directions vertical, Objects::Directions horizontal);
+    bool isVerticalDir(Objects::Directions dir);
+    bool isHorizontalDir(Objects::Directions dir);
+    bool isDiagonalDir(Objects::Directions dir);
 
-    static Objects::PieceColor getOpposingColor(Objects::PieceColor color);
-    static std::shared_ptr<Objects::Indicator> makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant = false);
+    Objects::PieceColor getOpposingColor(Objects::PieceColor color);
+    std::shared_ptr<Objects::Indicator> makeIndicator(sf::Sprite sprite, Objects::PieceName targetName, bool enpassant = false);
 
-    static void getPieceIndexesByTurn(short turn, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed);
-    static void getPieceIndexesByColor(Objects::PieceColor color, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed);
+    void getPieceIndexesByTurn(short turn, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed);
+    void getPieceIndexesByColor(Objects::PieceColor color, uint8_t& firstIndex, uint8_t& lastIndex, bool reversed);
 
-    static std::string forDevNameToString(Objects::PieceName name);
-    static char pieceColorToChar(Objects::PieceColor color);
-    static std::string forDevDirToString(Objects::Directions dir);
+    std::string forDevNameToString(Objects::PieceName name);
+    char pieceColorToChar(Objects::PieceColor color);
+    std::string forDevDirToString(Objects::Directions dir);
 };
-
-#endif

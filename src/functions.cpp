@@ -17,14 +17,14 @@ void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, st
 		}
     }
 
-	if (!checkLine->empty())
-	{
-		for (auto& el : *checkLine)
-		{
-			el->sprite.setTexture(Assets::getObjectTexture("ind_test")->texture);
-			window.draw(el->sprite);
-		}
-	}
+	//if (!checkLine->empty())
+	//{
+	//	for (auto& el : *checkLine)
+	//	{
+	//		el->sprite.setTexture(Assets::getObjectTexture("ind_test")->texture);
+	//		window.draw(el->sprite);
+	//	}
+	//}
 
 	if (piece != nullptr)
 	{
@@ -46,10 +46,8 @@ void Functions::refreshFrame(sf::RenderWindow& window, Objects::Board& board, st
 
 	if (promotoionOpen)
 	{
-		std::cout << "dsadsa" << std::endl;
 		window.draw(promotionWindow->shape);
 		window.draw(promotionWindow->title);
-		std::cout << "dsadsa" << std::endl;
 		for (auto& el : promotionWindow->options)
 		{
 			window.draw(el.shape);
@@ -177,6 +175,10 @@ void Functions::afterMove(std::shared_ptr<Objects::Piece> currentPiece, std::sha
 	else
 	{
 		currentPiece->getPinnedPieces(pinnedPieces, chessBoard);
+		currentPiece->getLegalMovesNoRestrictions(chessBoard);
+		check = chessBoard.checkForCheck(currentPiece, chessBoard.getKingByColor(Objects::getOpposingColor(currentPiece->color)), checkLine);
+		chessBoard.getBlockingPieces(turn * -1, &checkLine);
+		currentPiece->deleteLegalMoves();
 	}
 
 	checkLine.clear();

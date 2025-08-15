@@ -1,7 +1,11 @@
 #include "assets.h"
+#include "settings.h"
 
-std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::pieceTextures;
-std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::otherTextures;
+namespace Assets
+{
+    std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::pieceTextures;
+    std::vector<std::shared_ptr<Assets::ObjectTexture>> Assets::otherTextures;
+}
 
 std::shared_ptr<Assets::ObjectTexture> Assets::getObjectTexture(const std::string& name)
 {
@@ -22,7 +26,7 @@ std::shared_ptr<Assets::ObjectTexture> Assets::getObjectTexture(const std::strin
     return nullptr;
 }
 
-bool Assets::loadImage(const std::string& path, const std::string& name, sf::Texture& texture)
+bool Assets::loadImage(const std::string& name, sf::Texture& texture)
 {
     return texture.loadFromFile(name + fileType);
 }
@@ -33,7 +37,7 @@ void Assets::loadDirectoryElements(const std::string& path)
     for (const auto& text : contents)
     {
         sf::Texture temp;
-        if(!Assets::loadImage(path, text.substr(0, text.size()-4), temp))
+        if(!Assets::loadImage(text.substr(0, text.size()-4), temp))
         {
             std::cerr << "Couldn't load " + text.substr(0, text.size()-4) << std::endl;
             continue;

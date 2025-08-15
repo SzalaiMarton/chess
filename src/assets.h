@@ -1,11 +1,9 @@
-#ifndef ASSETS_H
-#define ASSETS_H
+#pragma once
 
 #include "settings.h"
 
-class Assets
+namespace Assets
 {
-public:
     class ObjectTexture
     {
     public:
@@ -15,13 +13,11 @@ public:
         ObjectTexture(const std::string& name, sf::Texture& texture);
     };
 
-    static std::shared_ptr<Assets::ObjectTexture> getObjectTexture(const std::string& name);
-    static bool loadImage(const std::string& path, const std::string& name, sf::Texture& texture);
-    static void loadDirectoryElements(const std::string& path);
-    static std::vector<std::string> getDirectoryContents(const std::string &path);
+    std::shared_ptr<Assets::ObjectTexture> getObjectTexture(const std::string& name);
+    bool loadImage(const std::string& name, sf::Texture& texture);
+    void loadDirectoryElements(const std::string& path);
+    std::vector<std::string> getDirectoryContents(const std::string &path);
     
-    static std::vector<std::shared_ptr<Assets::ObjectTexture>> pieceTextures;
-    static std::vector<std::shared_ptr<Assets::ObjectTexture>> otherTextures;
+    extern std::vector<std::shared_ptr<Assets::ObjectTexture>> pieceTextures;
+    extern std::vector<std::shared_ptr<Assets::ObjectTexture>> otherTextures;
 };
-
-#endif

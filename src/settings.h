@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -36,5 +35,3 @@ extern std::vector<char> colorOrder;
 const std::string pathToPieceTextures = "res\\textures\\piece_textures";
 const std::string pathToOtherTextures = "res\\textures\\other_textures";
 const std::string fileType = ".png";
-
-#endif

@@ -2,17 +2,6 @@
 
 sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), windowTitle);
 
-/*
-static uint32_t allocCounter;
-
-void* operator new(size_t size)
-{
-    allocCounter++;
-    std::cout << "Allocating: " << size << std::endl;
-    return malloc(size);
-}
-*/
-
 int main()
 {
     std::shared_ptr<Objects::Piece> currentPiece = nullptr;
@@ -76,7 +65,7 @@ int main()
 
                 if (currentPiece->name != Objects::CELL && Functions::isNameInRange(currentPiece->name) && Functions::isPieceMatchTurn(currentPiece, turn))
                 {
-                    if ((check && !chessBoard.canPieceBlock(currentPiece) && currentPiece->name != Objects::KING) || currentPiece->isPinned)
+                    if ((check && !chessBoard.canPieceBlock(currentPiece) && currentPiece->name != Objects::KING) /*|| currentPiece->isPinned*/)
                     {
                         continue;
                     }

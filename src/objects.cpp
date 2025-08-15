@@ -77,10 +77,6 @@ void Objects::Piece::getLegalMoves(Objects::Board& board, bool onlyAttacks)
 
 void Objects::Piece::getLegalMovesNoRestrictions(Objects::Board& board)
 {
-    // used to get pinned piece
-    // only used for rook, bishop, queen
-    // only restriction is: ally is blocking since those cannot be pinned by ally
-
     short multiplierX{}, multiplierY{};
     sf::Vector2i cellCords{};
     std::shared_ptr<Objects::Piece> targetCell{};
@@ -1039,7 +1035,7 @@ void Objects::Board::getBlockingPieces(short turn, std::vector<std::shared_ptr<O
     std::vector<std::vector<std::shared_ptr<Objects::Indicator>>> tempLegalMoves{};
     Objects::getPieceIndexesByTurn(turn, firstInd, lastInd, false);
 
-	for (uint8_t i = firstInd; i < lastInd; i++)
+    for (uint8_t i = firstInd; i < lastInd + 1; i++)
 	{
         tempLegalMoves.resize(8);
 		
@@ -1053,7 +1049,7 @@ void Objects::Board::getBlockingPieces(short turn, std::vector<std::shared_ptr<O
 		{
             for (auto& move : dir)
 			{
-				for (auto& check : *checkLine)
+                for (auto& check : *checkLine)
 				{
                     if (move->sprite.getPosition() == check->sprite.getPosition())
 					{
@@ -1093,7 +1089,7 @@ void Objects::Board::deleteAllMoves()
 {
     for (auto& piece : this->onBoard)
     {
-        if (piece->name != Objects::CELL)
+        if (piece->name != Objects::CELL && !piece->isPinned)
         {
             piece->deleteLegalMoves();
         }

@@ -123,5 +123,15 @@
     <Image Include="res\textures\other_textures\cell.png">
       <Filter>res\texture\other_textures</Filter>
     </Image>
+    <Image Include="res\textures\other_textures\indicator.png" />
+    <Image Include="res\textures\other_textures\Pbishop.png" />
+    <Image Include="res\textures\other_textures\Pknight.png" />
+    <Image Include="res\textures\other_textures\promotion.png" />
+    <Image Include="res\textures\other_textures\promotion_title.png" />
+    <Image Include="res\textures\other_textures\promotion_knight.png" />
+    <Image Include="res\textures\other_textures\promotion_bishop.png" />
+    <Image Include="res\textures\other_textures\ind_test.png" />
+    <Image Include="res\textures\other_textures\promotion_queen.png" />
+    <Image Include="res\textures\other_textures\promotion_rook.png" />
   </ItemGroup>
 </Project>

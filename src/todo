@@ -1,6 +1,0 @@
-- game ending check -> stalemate, win, lose
-
-- lose -> if no moves left during check and king in checkLine -> enemy win
-- stalemate -> if no moves left but king isnt in checkLine
-
-- after promotion check check
